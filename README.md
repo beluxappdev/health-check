@@ -1,13 +1,13 @@
 # AKS Well-Architected Assessment
 
-## Project Introduction:
+## Project Introduction
 Kubernetes and its Azure implementation has become a market standard for deploying modern cloud-oriented microservice applications. 
 The purpose of the assessment is to verify that Microsoft good practices are applied to prevent security or reliability problems from compromising compliance with the service level agreements guaranteed by the hosted applications in the future.
 
 
 ## Checks implemented
 
-### Security:
+### Security
 - Cluster must be private
 - NSG should be linked to node pools subnets
 - External IP addresses should not be associated with AKS load balancer 
@@ -23,11 +23,11 @@ The purpose of the assessment is to verify that Microsoft good practices are app
 - Leverage Cluster Managed Identity
 - Disable local accounts
 
-### Observability:
+### Observability
 - Container Insights should be enabled
 - Diagnostic Settings should be enabled
   
-### Resiliency:
+### Resiliency
 - Availability zones should be used
 - Uptime SLA should be enabled
 - Control plane and node pools version should not be outdated
