@@ -127,7 +127,7 @@ function CheckNodePoolSubnetsHasNSG {
 
     foreach ($agentProfile in $agentPoolProfiles) {
         if ($agentProfile.vnetSubnetId) {
-            $subnet = az network vnet subnet show --ids $agentProfile.vnetSubnetId | ConvertFrom-Json
+            $subnet = az network vnet subnet show --ids $agentProfile.vnetSubnetId -o json | ConvertFrom-Json
             if (-not $subnet.networkSecurityGroup) {
                 return $koMessage
             }
@@ -157,7 +157,7 @@ function CheckDiagnosticSettings {
     Param(
         [Parameter(Mandatory = $true)]$cluster
     )  
-    $diagnosticSettings = az monitor diagnostic-settings list --resource $cluster.id | ConvertFrom-Json
+    $diagnosticSettings = az monitor diagnostic-settings list --resource $cluster.id -o json | ConvertFrom-Json
     if ($diagnosticSettings) { 
         return $okMessage 
     } 
