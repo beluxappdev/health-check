@@ -279,6 +279,7 @@ class AKSCluster {
         $this.Result.CNIOverlay = Wrap {$this.isCNIOverlay()} "Azure CNI Overlay"
         
         # Performance
+        Write-Host "** Performance" -ForegroundColor Cyan
         $this.Result.OsDiskType = Wrap {$this.isOSDiskTypeEphemeral()} "OS Disk type is ephemeral"
 
         # Compliance
