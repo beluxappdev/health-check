@@ -258,22 +258,27 @@ class AKSCluster {
         $this.Result.ClusterName = PrintAndReturn $this.ClusterObject.name "Cluster Name"
         $this.Result.ProvisioningState = PrintAndReturn $this.ClusterObject.provisioningState "Provisioning State"
         $this.Result.ManagedResourceGroup = PrintAndReturn $this.ClusterObject.nodeResourceGroup "Node Resource Group"
+        
+        # Resiliency
         $this.Result.CurrentTotalNodeCount = PrintAndReturn $this.getTotalNodeCount() "Total Node Count"
         $this.Result.CurrentNodepoolCount = PrintAndReturn $this.getNodepoolCount() "Nodepool Count"
         $this.Result.NodePoolsWithoutAutoscaling = Wrap {$this.countNodepoolsWithoutAutoscaling()} "Nodepools without autoscaling" 0
+        $this.Result.AvailabilityZones = Wrap {$this.hasAvailabilityZonesEnabled()} "Availability Zones enabled"
+        $this.Result.SystemAndUserNodePool = Wrap {$this.hasUserNodePools()} "User Nodepools enabled"
         
         # Private Cluster
         Write-Host "** Private cluster" -ForegroundColor Cyan
         $this.Result.PrivateCluster = Wrap {$this.isClusterPrivate()} "Is Cluster Private"
         $this.Result.HasPrivateFQDN = Wrap {$this.hasPrivateFQDN()} "Has Private FQDN"
         $this.Result.LoadBalancerHasPublicIP = Wrap {$this.hasLoadBalancerWithPublicOutboundIp()} "Load balancer uses public IP" $false
-        $this.Result.AvailabilityZones = Wrap {$this.hasAvailabilityZonesEnabled()} "Availability Zones enabled"
         
         # Network best practices
         Write-Host "** Networking best practices" -ForegroundColor Cyan
         $this.Result.StandardLoadBalancer = Wrap {$this.hasStandardLoadBalancer()} "Standard Load Balancer"
         $this.Result.NetworkPolicies = Wrap {$this.hasNetworkPoliciesEnabled()} "Network Policies enabled" 
         $this.Result.CNIOverlay = Wrap {$this.isCNIOverlay()} "Azure CNI Overlay"
+        
+        # Performance
         $this.Result.OsDiskType = Wrap {$this.isOSDiskTypeEphemeral()} "OS Disk type is ephemeral"
 
         # Compliance
@@ -282,7 +287,6 @@ class AKSCluster {
         $this.Result.IsKubernetesVersionSupported = Wrap {$this.isKubernetesVersionSupported()} "Kubernetes version supported"
         $this.Result.AutoUpgradeProfile = Wrap {$this.hasAutoUpgradeProfile()} "Auto Upgrade Profile"
         $this.Result.UptimeSlaConfiguration = Wrap {$this.hasUptimeSLAEnabled()} "Up-time SLA enabled"
-        $this.Result.SystemAndUserNodePool = Wrap {$this.hasUserNodePools()} "User Nodepools enabled"
         $this.Result.AzurePolicy = Wrap {$this.hasAzurePoliciesEnabled()} "Azure Policies enabled"
 
 
