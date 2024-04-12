@@ -18,7 +18,7 @@ class AKSClusterResult {
     [string]$ContainerInsights
     [string]$DiagnosticSettings
     [string]$UserAssignedIdentity
-    [string]$PodIdentityDeprecated
+    [string]$UsesDeprecatedPodIdentity
     [string]$MicrosoftDefender
     [string]$RBAC
     [string]$AzureADIntegration
@@ -262,52 +262,52 @@ class AKSCluster {
         # Resiliency
         $this.Result.CurrentTotalNodeCount = PrintAndReturn $this.getTotalNodeCount() "Total Node Count"
         $this.Result.CurrentNodepoolCount = PrintAndReturn $this.getNodepoolCount() "Nodepool Count"
-        $this.Result.NodePoolsWithoutAutoscaling = Wrap {$this.countNodepoolsWithoutAutoscaling()} "Nodepools without autoscaling" 0
-        $this.Result.AvailabilityZones = Wrap {$this.hasAvailabilityZonesEnabled()} "Availability Zones enabled"
-        $this.Result.SystemAndUserNodePool = Wrap {$this.hasUserNodePools()} "User Nodepools enabled"
+        $this.Result.NodePoolsWithoutAutoscaling = Wrap { $this.countNodepoolsWithoutAutoscaling() } "Nodepools without autoscaling" 0
+        $this.Result.AvailabilityZones = Wrap { $this.hasAvailabilityZonesEnabled() } "Availability Zones enabled"
+        $this.Result.SystemAndUserNodePool = Wrap { $this.hasUserNodePools() } "User Nodepools enabled"
         
         # Private Cluster
         Write-Host "** Private cluster" -ForegroundColor Cyan
-        $this.Result.PrivateCluster = Wrap {$this.isClusterPrivate()} "Is Cluster Private"
-        $this.Result.HasPrivateFQDN = Wrap {$this.hasPrivateFQDN()} "Has Private FQDN"
-        $this.Result.LoadBalancerHasPublicIP = Wrap {$this.hasLoadBalancerWithPublicOutboundIp()} "Load balancer uses public IP" $false
+        $this.Result.PrivateCluster = Wrap { $this.isClusterPrivate() } "Is Cluster Private"
+        $this.Result.HasPrivateFQDN = Wrap { $this.hasPrivateFQDN() } "Has Private FQDN"
+        $this.Result.LoadBalancerHasPublicIP = Wrap { $this.hasLoadBalancerWithPublicOutboundIp() } "Load balancer uses public IP" $false
         
         # Network best practices
         Write-Host "** Networking best practices" -ForegroundColor Cyan
-        $this.Result.StandardLoadBalancer = Wrap {$this.hasStandardLoadBalancer()} "Standard Load Balancer"
-        $this.Result.NetworkPolicies = Wrap {$this.hasNetworkPoliciesEnabled()} "Network Policies enabled" 
-        $this.Result.CNIOverlay = Wrap {$this.isCNIOverlay()} "Azure CNI Overlay"
+        $this.Result.StandardLoadBalancer = Wrap { $this.hasStandardLoadBalancer() } "Standard Load Balancer"
+        $this.Result.NetworkPolicies = Wrap { $this.hasNetworkPoliciesEnabled() } "Network Policies enabled" 
+        $this.Result.CNIOverlay = Wrap { $this.isCNIOverlay() } "Azure CNI Overlay"
         
         # Performance
         Write-Host "** Performance" -ForegroundColor Cyan
-        $this.Result.OsDiskType = Wrap {$this.isOSDiskTypeEphemeral()} "OS Disk type is ephemeral"
+        $this.Result.OsDiskType = Wrap { $this.isOSDiskTypeEphemeral() } "OS Disk type is ephemeral"
 
         # Compliance
         Write-Host "** Compliance" -ForegroundColor Cyan
         $this.Result.Version = PrintAndReturn $this.ClusterObject.kubernetesVersion "Kubernetes Version"
-        $this.Result.IsKubernetesVersionSupported = Wrap {$this.isKubernetesVersionSupported()} "Kubernetes version supported"
-        $this.Result.AutoUpgradeProfile = Wrap {$this.hasAutoUpgradeProfile()} "Auto Upgrade Profile"
-        $this.Result.UptimeSlaConfiguration = Wrap {$this.hasUptimeSLAEnabled()} "Up-time SLA enabled"
-        $this.Result.AzurePolicy = Wrap {$this.hasAzurePoliciesEnabled()} "Azure Policies enabled"
+        $this.Result.IsKubernetesVersionSupported = Wrap { $this.isKubernetesVersionSupported() } "Kubernetes version supported"
+        $this.Result.AutoUpgradeProfile = Wrap { $this.hasAutoUpgradeProfile() } "Auto Upgrade Profile"
+        $this.Result.UptimeSlaConfiguration = Wrap { $this.hasUptimeSLAEnabled() } "Up-time SLA enabled"
+        $this.Result.AzurePolicy = Wrap { $this.hasAzurePoliciesEnabled() } "Azure Policies enabled"
 
 
         # Add-ons
         Write-Host "** Add-ons" -ForegroundColor Cyan
-        $this.Result.ContainerInsights = Wrap {$this.isContainerInsightsEnabled()} "Container Insights enabled"
-        $this.Result.DiagnosticSettings = Wrap {$this.hasDiagnosticSettings()} "Diagnostic Settings enabled"
-        $this.Result.MicrosoftDefender = Wrap {$this.hasMicrosoftDefender()} "Defender is enabled"
-        $this.Result.KMSConfigured = Wrap {$this.hasKeyVaultSecretProviderEnabled()} "Key Vault Secret Provider enabled"
-        $this.Result.HttpApplicationRouting = Wrap {$this.hasHttpApplicationRoutingEnabled()} "HTTP Application Routing enabled" $false
+        $this.Result.ContainerInsights = Wrap { $this.isContainerInsightsEnabled() } "Container Insights enabled"
+        $this.Result.DiagnosticSettings = Wrap { $this.hasDiagnosticSettings() } "Diagnostic Settings enabled"
+        $this.Result.MicrosoftDefender = Wrap { $this.hasMicrosoftDefender() } "Defender is enabled"
+        $this.Result.KMSConfigured = Wrap { $this.hasKeyVaultSecretProviderEnabled() } "Key Vault Secret Provider enabled"
+        $this.Result.HttpApplicationRouting = Wrap { $this.hasHttpApplicationRoutingEnabled() } "HTTP Application Routing enabled" $false
         
         
         # Authentication and Authorization
         Write-Host "** Authentication and Authorization" -ForegroundColor Cyan
-        $this.Result.RBAC = Wrap {$this.hasRBACEnabled()} "RBAC enabled"
-        $this.Result.AzureADIntegration = Wrap {$this.hasAzureADIntegrationEnabled()} "Azure AD Integration enabled"
-        $this.Result.DisableLocalAccounts = Wrap {$this.hasLocalAccountsDisabled()} "Local accounts disabled" 
-        $this.Result.UserAssignedIdentity = Wrap {$this.hasManagedIdentity()} "Managed Identity"
-        $this.Result.WorkloadIdentity = Wrap {$this.hasWorkloadIdentityEnabled()} "Workload Identity enabled"
-        $this.Result.PodIdentityDeprecated = Wrap {$this.hasPodIdentities()} "Pod Identities enabled (switch to workload identities)" $false
+        $this.Result.RBAC = Wrap { $this.hasRBACEnabled() } "RBAC enabled"
+        $this.Result.AzureADIntegration = Wrap { $this.hasAzureADIntegrationEnabled() } "Azure AD Integration enabled"
+        $this.Result.DisableLocalAccounts = Wrap { $this.hasLocalAccountsDisabled() } "Local accounts disabled" 
+        $this.Result.UserAssignedIdentity = Wrap { $this.hasManagedIdentity() } "Managed Identity"
+        $this.Result.WorkloadIdentity = Wrap { $this.hasWorkloadIdentityEnabled() } "Workload Identity enabled"
+        $this.Result.UsesDeprecatedPodIdentity = Wrap { $this.hasPodIdentities() } "Pod Identities enabled (switch to workload identities)" $false
         
         return $this.Result
     }
@@ -327,10 +327,12 @@ function Wrap($fn, $name, $expected = $true) {
         Out "$($result)"
         if ($result -ne $expected) {
             Write-Host "☑️   Expected $($expected) but got $($result)"
-        } else {
+        }
+        else {
             Write-Host "✅"
         }
-    } catch {
+    }
+    catch {
         $result = "Error"
         Write-Host "⛔ $($_.Exception.Message)"
     }
