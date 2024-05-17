@@ -326,7 +326,7 @@ function Wrap($fn, $name, $expected = $true) {
         $result = & $fn
         Out "$($result)"
         if ($result -ne $expected) {
-            Write-Host "☑️   Expected $($expected) but got $($result)"
+            Write-Host "⚠️   Expected $($expected) but got $($result)"
         }
         else {
             Write-Host "✅"
@@ -334,7 +334,7 @@ function Wrap($fn, $name, $expected = $true) {
     }
     catch {
         $result = "Error"
-        Write-Host "⛔ $($_.Exception.Message)"
+        Write-Host "⛔ Error: $($_.Exception.Message)"
     }
     return $result
 }
