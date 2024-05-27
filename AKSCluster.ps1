@@ -113,7 +113,7 @@ class AKSCluster {
 
     # Checks if the cluster has network policies enabled
     [bool] hasNetworkPoliciesEnabled() {
-        return $this.ClusterObject.networkProfile.networkPolicy -eq "azure" -or $this.ClusterObject.networkProfile.networkPolicy -eq "calico"
+        return $this.ClusterObject.networkProfile.networkPolicy -eq "azure" -or $this.ClusterObject.networkProfile.networkPolicy -eq "calico" -or $this.ClusterObject.networkProfile.networkPolicy -eq "cilium" 
     }
 
     # Checks if the cluster has network plugin mode set cni overlay
