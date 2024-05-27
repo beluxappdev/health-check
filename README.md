@@ -60,7 +60,7 @@ level agreements guaranteed by the hosted applications in the future.
 
 ### Prerequisites
 
-- Windows PowerShell 5+ / PowerShell Core 7+
+- PowerShell Core 7+
 - Azure CLI
 - "account" extension installed on Azure CLI: `az extension add --name account`
 
