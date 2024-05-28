@@ -44,8 +44,7 @@ level agreements guaranteed by the hosted applications in the future.
 - Container Insights should be enabled
 - Diagnostic Settings should be enabled
 - Defender profile should be enabled
-- KMS should be enabled
-- HTTP Application Routing should not be used in production
+- KeyVault Secret Provider should be used
 
 ### Authentication and Authorization
 

@@ -1,4 +1,9 @@
+using module ./ResourceCheck.psm1
+
 class AKSClusterResult {
+    AKSClusterResult() {
+        
+    }
     [string]$Compliant
     [string]$SubscriptionId
     [string]$SubscriptionName
@@ -39,16 +44,13 @@ class AKSClusterResult {
     [string]$StandardLoadBalancer
 }
 
-class AKSCluster {
-    [string]$SubscriptionId
-    [string]$SubscriptionName
+class AKSClusterCheck: ResourceCheck {
+    
     [object]$ClusterObject
     [AKSClusterResult]$Result
 
 
-    AKSCluster([object] $cluster, [string] $subscriptionId, [string] $subscriptionName) {
-        $this.SubscriptionId = $subscriptionId
-        $this.SubscriptionName = $subscriptionName
+    AKSClusterCheck([string] $subscriptionId, [string] $subscriptionName, [object] $cluster): base($subscriptionId, $subscriptionName) {
         $this.ClusterObject = $cluster
         $this.Result = [AKSClusterResult]::new()
     }
@@ -72,7 +74,7 @@ class AKSCluster {
     }
 
     # Checks if the cluster is private
-    [bool] isClusterPrivate() {
+    [bool] isClusterPrivate() {        
         return ![string]::IsNullOrEmpty($this.ClusterObject.apiServerAccessProfile.enablePrivateCluster)
     }
 
@@ -232,7 +234,7 @@ class AKSCluster {
         return $true
     }
 
-    # Checks if http application routing add-on is enabled (should be disabled)
+    # Checks if http application routing add-on is enabled
     [bool] hasHttpApplicationRoutingEnabled() {
         return $this.ClusterObject.addonProfiles.httpApplicationRouting.enabled
     } 
@@ -248,69 +250,81 @@ class AKSCluster {
         # return "AKSCluster: $($this.ClusterName) in Resource Group: $($this.ResourceGroup) in Subscription: $($this.SubscriptionName) with $($this.CurrentNodepoolCount) node pools and $($this.CurrentTotalNodeCount) nodes. Is private: $($this.IsClusterPrivate())"
     }
 
-    # Assess the cluster
     [AKSClusterResult] assess() {
-        Write-Host "** General informaton" -ForegroundColor Cyan
-        $this.Result.SubscriptionId = PrintAndReturn $this.SubscriptionId "Subscription ID"
-        $this.Result.SubscriptionName = PrintAndReturn $this.SubscriptionName "Subscription Name"
-        $this.Result.ResourceGroup = PrintAndReturn $this.ClusterObject.resourceGroup "Resource Group"
-        $this.Result.Region = PrintAndReturn $this.ClusterObject.location "Region"
-        $this.Result.ClusterName = PrintAndReturn $this.ClusterObject.name "Cluster Name"
-        $this.Result.ProvisioningState = PrintAndReturn $this.ClusterObject.provisioningState "Provisioning State"
-        $this.Result.ManagedResourceGroup = PrintAndReturn $this.ClusterObject.nodeResourceGroup "Node Resource Group"
-        
-        # Resiliency
-        $this.Result.CurrentTotalNodeCount = PrintAndReturn $this.getTotalNodeCount() "Total Node Count"
-        $this.Result.CurrentNodepoolCount = PrintAndReturn $this.getNodepoolCount() "Nodepool Count"
-        $this.Result.NodePoolsWithoutAutoscaling = Wrap { $this.countNodepoolsWithoutAutoscaling() } "Nodepools without autoscaling" 0
-        $this.Result.AvailabilityZones = Wrap { $this.hasAvailabilityZonesEnabled() } "Availability Zones enabled"
-        $this.Result.SystemAndUserNodePool = Wrap { $this.hasUserNodePools() } "User Nodepools enabled"
-        
-        # Private Cluster
-        Write-Host "** Private cluster" -ForegroundColor Cyan
-        $this.Result.PrivateCluster = Wrap { $this.isClusterPrivate() } "Is Cluster Private"
-        $this.Result.HasPrivateFQDN = Wrap { $this.hasPrivateFQDN() } "Has Private FQDN"
-        $this.Result.LoadBalancerHasPublicIP = Wrap { $this.hasLoadBalancerWithPublicOutboundIp() } "Load balancer uses public IP" $false
-        
-        # Network best practices
-        Write-Host "** Networking best practices" -ForegroundColor Cyan
-        $this.Result.StandardLoadBalancer = Wrap { $this.hasStandardLoadBalancer() } "Standard Load Balancer"
-        $this.Result.NetworkPolicies = Wrap { $this.hasNetworkPoliciesEnabled() } "Network Policies enabled" 
-        $this.Result.CNIOverlay = Wrap { $this.isCNIOverlay() } "Azure CNI Overlay"
-        
-        # Performance
-        Write-Host "** Performance" -ForegroundColor Cyan
-        $this.Result.OsDiskType = Wrap { $this.isOSDiskTypeEphemeral() } "OS Disk type is ephemeral"
+        $rules = Get-Content aksRules.json | ConvertFrom-Json
 
-        # Compliance
-        Write-Host "** Compliance" -ForegroundColor Cyan
-        $this.Result.Version = PrintAndReturn $this.ClusterObject.kubernetesVersion "Kubernetes Version"
-        $this.Result.IsKubernetesVersionSupported = Wrap { $this.isKubernetesVersionSupported() } "Kubernetes version supported"
-        $this.Result.AutoUpgradeProfile = Wrap { $this.hasAutoUpgradeProfile() } "Auto Upgrade Profile"
-        $this.Result.UptimeSlaConfiguration = Wrap { $this.hasUptimeSLAEnabled() } "Up-time SLA enabled"
-        $this.Result.AzurePolicy = Wrap { $this.hasAzurePoliciesEnabled() } "Azure Policies enabled"
+        foreach ($ruleTuple in $rules.PSObject.Properties) {
+            $this.checkRule($ruleTuple.Name, $ruleTuple.Value)
+        }
 
-
-        # Add-ons
-        Write-Host "** Add-ons" -ForegroundColor Cyan
-        $this.Result.ContainerInsights = Wrap { $this.isContainerInsightsEnabled() } "Container Insights enabled"
-        $this.Result.DiagnosticSettings = Wrap { $this.hasDiagnosticSettings() } "Diagnostic Settings enabled"
-        $this.Result.MicrosoftDefender = Wrap { $this.hasMicrosoftDefender() } "Defender is enabled"
-        $this.Result.KMSConfigured = Wrap { $this.hasKeyVaultSecretProviderEnabled() } "Key Vault Secret Provider enabled"
-        $this.Result.HttpApplicationRouting = Wrap { $this.hasHttpApplicationRoutingEnabled() } "HTTP Application Routing enabled" $false
-        
-        
-        # Authentication and Authorization
-        Write-Host "** Authentication and Authorization" -ForegroundColor Cyan
-        $this.Result.RBAC = Wrap { $this.hasRBACEnabled() } "RBAC enabled"
-        $this.Result.AzureADIntegration = Wrap { $this.hasAzureADIntegrationEnabled() } "Azure AD Integration enabled"
-        $this.Result.DisableLocalAccounts = Wrap { $this.hasLocalAccountsDisabled() } "Local accounts disabled" 
-        $this.Result.UserAssignedIdentity = Wrap { $this.hasManagedIdentity() } "Managed Identity"
-        $this.Result.WorkloadIdentity = Wrap { $this.hasWorkloadIdentityEnabled() } "Workload Identity enabled"
-        $this.Result.UsesDeprecatedPodIdentity = Wrap { $this.hasPodIdentities() } "Pod Identities enabled (switch to workload identities)" $false
-        
+        $this.Result | Format-Table
         return $this.Result
     }
+
+
+    # Assess the cluster
+    # [AKSClusterResult] assess() {
+    #     Write-Host "** General informaton" -ForegroundColor Cyan
+    #     $this.Result.SubscriptionId = PrintAndReturn $this.SubscriptionId "Subscription ID"
+    #     $this.Result.SubscriptionName = PrintAndReturn $this.SubscriptionName "Subscription Name"
+    #     $this.Result.ResourceGroup = PrintAndReturn $this.ClusterObject.resourceGroup "Resource Group"
+    #     $this.Result.Region = PrintAndReturn $this.ClusterObject.location "Region"
+    #     $this.Result.ClusterName = PrintAndReturn $this.ClusterObject.name "Cluster Name"
+    #     $this.Result.ProvisioningState = PrintAndReturn $this.ClusterObject.provisioningState "Provisioning State"
+    #     $this.Result.ManagedResourceGroup = PrintAndReturn $this.ClusterObject.nodeResourceGroup "Node Resource Group"
+        
+    #     # Resiliency
+    #     $this.Result.CurrentTotalNodeCount = PrintAndReturn $this.getTotalNodeCount() "Total Node Count"
+    #     $this.Result.CurrentNodepoolCount = PrintAndReturn $this.getNodepoolCount() "Nodepool Count"
+    #     $this.Result.NodePoolsWithoutAutoscaling = Wrap { $this.countNodepoolsWithoutAutoscaling() } "Nodepools without autoscaling" 0
+    #     $this.Result.AvailabilityZones = Wrap { $this.hasAvailabilityZonesEnabled() } "Availability Zones enabled"
+    #     $this.Result.SystemAndUserNodePool = Wrap { $this.hasUserNodePools() } "User Nodepools enabled"
+        
+    #     # Private Cluster
+    #     Write-Host "** Private cluster" -ForegroundColor Cyan
+    #     $this.Result.PrivateCluster = Wrap { $this.isClusterPrivate() } "Is Cluster Private"
+    #     $this.Result.HasPrivateFQDN = Wrap { $this.hasPrivateFQDN() } "Has Private FQDN"
+    #     $this.Result.LoadBalancerHasPublicIP = Wrap { $this.hasLoadBalancerWithPublicOutboundIp() } "Load balancer uses public IP" $false
+        
+    #     # Network best practices
+    #     Write-Host "** Networking best practices" -ForegroundColor Cyan
+    #     $this.Result.StandardLoadBalancer = Wrap { $this.hasStandardLoadBalancer() } "Standard Load Balancer"
+    #     $this.Result.NetworkPolicies = Wrap { $this.hasNetworkPoliciesEnabled() } "Network Policies enabled" 
+    #     $this.Result.CNIOverlay = Wrap { $this.isCNIOverlay() } "Azure CNI Overlay"
+        
+    #     # Performance
+    #     Write-Host "** Performance" -ForegroundColor Cyan
+    #     $this.Result.OsDiskType = Wrap { $this.isOSDiskTypeEphemeral() } "OS Disk type is ephemeral"
+
+    #     # Compliance
+    #     Write-Host "** Compliance" -ForegroundColor Cyan
+    #     $this.Result.Version = PrintAndReturn $this.ClusterObject.kubernetesVersion "Kubernetes Version"
+    #     $this.Result.IsKubernetesVersionSupported = Wrap { $this.isKubernetesVersionSupported() } "Kubernetes version supported"
+    #     $this.Result.AutoUpgradeProfile = Wrap { $this.hasAutoUpgradeProfile() } "Auto Upgrade Profile"
+    #     $this.Result.UptimeSlaConfiguration = Wrap { $this.hasUptimeSLAEnabled() } "Up-time SLA enabled"
+    #     $this.Result.AzurePolicy = Wrap { $this.hasAzurePoliciesEnabled() } "Azure Policies enabled"
+
+
+    #     # Add-ons
+    #     Write-Host "** Add-ons" -ForegroundColor Cyan
+    #     $this.Result.ContainerInsights = Wrap { $this.isContainerInsightsEnabled() } "Container Insights enabled"
+    #     $this.Result.DiagnosticSettings = Wrap { $this.hasDiagnosticSettings() } "Diagnostic Settings enabled"
+    #     $this.Result.MicrosoftDefender = Wrap { $this.hasMicrosoftDefender() } "Defender is enabled"
+    #     $this.Result.KMSConfigured = Wrap { $this.hasKeyVaultSecretProviderEnabled() } "Key Vault Secret Provider enabled"
+    #     $this.Result.HttpApplicationRouting = Wrap { $this.hasHttpApplicationRoutingEnabled() } "HTTP Application Routing enabled" $false
+        
+        
+    #     # Authentication and Authorization
+    #     Write-Host "** Authentication and Authorization" -ForegroundColor Cyan
+    #     $this.Result.RBAC = Wrap { $this.hasRBACEnabled() } "RBAC enabled"
+    #     $this.Result.AzureADIntegration = Wrap { $this.hasAzureADIntegrationEnabled() } "Azure AD Integration enabled"
+    #     $this.Result.DisableLocalAccounts = Wrap { $this.hasLocalAccountsDisabled() } "Local accounts disabled" 
+    #     $this.Result.UserAssignedIdentity = Wrap { $this.hasManagedIdentity() } "Managed Identity"
+    #     $this.Result.WorkloadIdentity = Wrap { $this.hasWorkloadIdentityEnabled() } "Workload Identity enabled"
+    #     $this.Result.UsesDeprecatedPodIdentity = Wrap { $this.hasPodIdentities() } "Pod Identities enabled (switch to workload identities)" $false
+        
+    #     return $this.Result
+    # }
 
 }
 
