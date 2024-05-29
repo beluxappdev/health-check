@@ -71,7 +71,7 @@ foreach ($currentSubscription in $subscriptions) {
         Write-Host "**** Assessing the AKS Cluster $($currentAKSCluster.name)..." -ForegroundColor Blue
         $aksCluster = [AKSClusterCheck]::new($currentSubscription.id, $currentSubscription.displayName, $currentAKSCluster)
 
-        $aksCluster.assess() | Export-Csv -Path "$OutPath\assess_$today.csv" -NoTypeInformation -Append -Delimiter $csvDelimiter
+        $aksCluster.assess().GetAllResults() | Export-Csv -Path "$OutPath\assess_$today.csv" -NoTypeInformation -Append -Delimiter $csvDelimiter
         Write-Host ""
 
     }

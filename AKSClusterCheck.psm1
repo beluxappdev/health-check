@@ -1,56 +1,22 @@
 using module ./ResourceCheck.psm1
-
-class AKSClusterResult {
-    [string]$Compliant
-    [string]$SubscriptionId
-    [string]$SubscriptionName
-    [string]$ResourceGroup
-    [string]$ClusterName
-    [string]$ProvisioningState
-    [string]$Region
-    [string]$Version
-    [string]$ManagedResourceGroup
-    [string]$PrivateCluster
-    [string]$HasPrivateFQDN
-    [string]$LoadBalancerHasPublicIP
-    [string]$NodePoolSubnetWithNSG
-    [string]$NetworkPolicies
-    [string]$CNIOverlay
-    [string]$IsKubernetesVersionSupported
-    [string]$ContainerInsights
-    [string]$DiagnosticSettings
-    [string]$UserAssignedIdentity
-    [string]$UsesDeprecatedPodIdentity
-    [string]$MicrosoftDefender
-    [string]$RBAC
-    [string]$AzureADIntegration
-    [string]$DisableLocalAccounts
-    [string]$KMSConfigured
-    [string]$AzurePolicy
-    [string]$WorkloadIdentity
-    [string]$SystemAndUserNodePool
-    [string]$AvailabilityZones
-    [string]$UptimeSlaConfiguration
-    [string]$CurrentNodepoolCount
-    [string]$CurrentTotalNodeCount
-    [string]$OsDiskType
-    [string]$ErrorMessage
-    [string]$NodePoolsWithoutAutoscaling
-    [string]$AutoUpgradeProfile	
-    [string]$HttpApplicationRouting
-    [string]$StandardLoadBalancer
-}
+using module ./CheckResults.psm1
 
 
 class AKSClusterCheck: ResourceCheck {
     
     [object]$ClusterObject
-    [AKSClusterResult]$Result
 
 
     AKSClusterCheck([string] $subscriptionId, [string] $subscriptionName, [object] $cluster): base($subscriptionId, $subscriptionName) {
         $this.ClusterObject = $cluster
-        $this.Result = [AKSClusterResult]::new()
+    }
+
+    [string] getClusterName() {
+        return $this.ClusterObject.name
+    }
+
+    [string] getClusterResourceGroup() {
+        return $this.ClusterObject.resourceGroup
     }
 
     [string] getNodeResourceGroup() {
@@ -248,111 +214,48 @@ class AKSClusterCheck: ResourceCheck {
         # return "AKSCluster: $($this.ClusterName) in Resource Group: $($this.ResourceGroup) in Subscription: $($this.SubscriptionName) with $($this.CurrentNodepoolCount) node pools and $($this.CurrentTotalNodeCount) nodes. Is private: $($this.IsClusterPrivate())"
     }
 
-    [hashtable] assess() {
+    [CheckResults] assess() {
         $rules = Get-Content aksRules.json | ConvertFrom-Json
-        $res = @{}
+
+        $this.Results.Add("Cluster_Name", $this.getClusterName())
+        $this.Results.Add("Resource_Group", $this.getClusterResourceGroup())
+        $this.Results.Add("Node_Resource_Group", $this.getNodeResourceGroup())
 
         foreach ($ruleTuple in $rules.PSObject.Properties) {
-            $res[$ruleTuple.Name] = $this.checkRule($ruleTuple.Name, $ruleTuple.Value)
+            $this.Results.Add($ruleTuple.Name, $this.checkRule($ruleTuple.Name, $ruleTuple.Value))
         }
 
-        $this.Result | Format-Table
-        return $res
+        return $this.Results
     }
 
-
-    # Assess the cluster
-    # [AKSClusterResult] assess() {
-    #     Write-Host "** General informaton" -ForegroundColor Cyan
-    #     $this.Result.SubscriptionId = PrintAndReturn $this.SubscriptionId "Subscription ID"
-    #     $this.Result.SubscriptionName = PrintAndReturn $this.SubscriptionName "Subscription Name"
-    #     $this.Result.ResourceGroup = PrintAndReturn $this.ClusterObject.resourceGroup "Resource Group"
-    #     $this.Result.Region = PrintAndReturn $this.ClusterObject.location "Region"
-    #     $this.Result.ClusterName = PrintAndReturn $this.ClusterObject.name "Cluster Name"
-    #     $this.Result.ProvisioningState = PrintAndReturn $this.ClusterObject.provisioningState "Provisioning State"
-    #     $this.Result.ManagedResourceGroup = PrintAndReturn $this.ClusterObject.nodeResourceGroup "Node Resource Group"
-        
-    #     # Resiliency
-    #     $this.Result.CurrentTotalNodeCount = PrintAndReturn $this.getTotalNodeCount() "Total Node Count"
-    #     $this.Result.CurrentNodepoolCount = PrintAndReturn $this.getNodepoolCount() "Nodepool Count"
-    #     $this.Result.NodePoolsWithoutAutoscaling = Wrap { $this.countNodepoolsWithoutAutoscaling() } "Nodepools without autoscaling" 0
-    #     $this.Result.AvailabilityZones = Wrap { $this.hasAvailabilityZonesEnabled() } "Availability Zones enabled"
-    #     $this.Result.SystemAndUserNodePool = Wrap { $this.hasUserNodePools() } "User Nodepools enabled"
-        
-    #     # Private Cluster
-    #     Write-Host "** Private cluster" -ForegroundColor Cyan
-    #     $this.Result.PrivateCluster = Wrap { $this.isClusterPrivate() } "Is Cluster Private"
-    #     $this.Result.HasPrivateFQDN = Wrap { $this.hasPrivateFQDN() } "Has Private FQDN"
-    #     $this.Result.LoadBalancerHasPublicIP = Wrap { $this.hasLoadBalancerWithPublicOutboundIp() } "Load balancer uses public IP" $false
-        
-    #     # Network best practices
-    #     Write-Host "** Networking best practices" -ForegroundColor Cyan
-    #     $this.Result.StandardLoadBalancer = Wrap { $this.hasStandardLoadBalancer() } "Standard Load Balancer"
-    #     $this.Result.NetworkPolicies = Wrap { $this.hasNetworkPoliciesEnabled() } "Network Policies enabled" 
-    #     $this.Result.CNIOverlay = Wrap { $this.isCNIOverlay() } "Azure CNI Overlay"
-        
-    #     # Performance
-    #     Write-Host "** Performance" -ForegroundColor Cyan
-    #     $this.Result.OsDiskType = Wrap { $this.isOSDiskTypeEphemeral() } "OS Disk type is ephemeral"
-
-    #     # Compliance
-    #     Write-Host "** Compliance" -ForegroundColor Cyan
-    #     $this.Result.Version = PrintAndReturn $this.ClusterObject.kubernetesVersion "Kubernetes Version"
-    #     $this.Result.IsKubernetesVersionSupported = Wrap { $this.isKubernetesVersionSupported() } "Kubernetes version supported"
-    #     $this.Result.AutoUpgradeProfile = Wrap { $this.hasAutoUpgradeProfile() } "Auto Upgrade Profile"
-    #     $this.Result.UptimeSlaConfiguration = Wrap { $this.hasUptimeSLAEnabled() } "Up-time SLA enabled"
-    #     $this.Result.AzurePolicy = Wrap { $this.hasAzurePoliciesEnabled() } "Azure Policies enabled"
-
-
-    #     # Add-ons
-    #     Write-Host "** Add-ons" -ForegroundColor Cyan
-    #     $this.Result.ContainerInsights = Wrap { $this.isContainerInsightsEnabled() } "Container Insights enabled"
-    #     $this.Result.DiagnosticSettings = Wrap { $this.hasDiagnosticSettings() } "Diagnostic Settings enabled"
-    #     $this.Result.MicrosoftDefender = Wrap { $this.hasMicrosoftDefender() } "Defender is enabled"
-    #     $this.Result.KMSConfigured = Wrap { $this.hasKeyVaultSecretProviderEnabled() } "Key Vault Secret Provider enabled"
-    #     $this.Result.HttpApplicationRouting = Wrap { $this.hasHttpApplicationRoutingEnabled() } "HTTP Application Routing enabled" $false
-        
-        
-    #     # Authentication and Authorization
-    #     Write-Host "** Authentication and Authorization" -ForegroundColor Cyan
-    #     $this.Result.RBAC = Wrap { $this.hasRBACEnabled() } "RBAC enabled"
-    #     $this.Result.AzureADIntegration = Wrap { $this.hasAzureADIntegrationEnabled() } "Azure AD Integration enabled"
-    #     $this.Result.DisableLocalAccounts = Wrap { $this.hasLocalAccountsDisabled() } "Local accounts disabled" 
-    #     $this.Result.UserAssignedIdentity = Wrap { $this.hasManagedIdentity() } "Managed Identity"
-    #     $this.Result.WorkloadIdentity = Wrap { $this.hasWorkloadIdentityEnabled() } "Workload Identity enabled"
-    #     $this.Result.UsesDeprecatedPodIdentity = Wrap { $this.hasPodIdentities() } "Pod Identities enabled (switch to workload identities)" $false
-        
-    #     return $this.Result
-    # }
-
 }
 
-function Out($message) {
-    Write-Host $message -NoNewline
-}
+# function Out($message) {
+#     Write-Host $message -NoNewline
+# }
 
 # Function to wrap the execution of a function, print the result in sdtout and return the same result. Also performs a comparison with the expected value (true by default)
-function Wrap($fn, $name, $expected = $true) {
-    Out "$($name): "
-    $result
-    try {
-        $result = & $fn
-        Out "$($result)"
-        if ($result -ne $expected) {
-            Write-Host "⚠️   Expected $($expected) but got $($result)"
-        }
-        else {
-            Write-Host "✅"
-        }
-    }
-    catch {
-        $result = "Error"
-        Write-Host "⛔ Error: $($_.Exception.Message)"
-    }
-    return $result
-}
+# function Wrap($fn, $name, $expected = $true) {
+#     Out "$($name): "
+#     $result
+#     try {
+#         $result = & $fn
+#         Out "$($result)"
+#         if ($result -ne $expected) {
+#             Write-Host "⚠️   Expected $($expected) but got $($result)"
+#         }
+#         else {
+#             Write-Host "✅"
+#         }
+#     }
+#     catch {
+#         $result = "Error"
+#         Write-Host "⛔ Error: $($_.Exception.Message)"
+#     }
+#     return $result
+# }
 
-function PrintAndReturn($result, $message) {
-    Write-Host "$($message): $($result)"
-    return $result
-}
+# function PrintAndReturn($result, $message) {
+#     Write-Host "$($message): $($result)"
+#     return $result
+# }
