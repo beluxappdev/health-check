@@ -1,9 +1,6 @@
 using module ./ResourceCheck.psm1
 
 class AKSClusterResult {
-    AKSClusterResult() {
-        
-    }
     [string]$Compliant
     [string]$SubscriptionId
     [string]$SubscriptionName
@@ -43,6 +40,7 @@ class AKSClusterResult {
     [string]$HttpApplicationRouting
     [string]$StandardLoadBalancer
 }
+
 
 class AKSClusterCheck: ResourceCheck {
     
@@ -250,15 +248,16 @@ class AKSClusterCheck: ResourceCheck {
         # return "AKSCluster: $($this.ClusterName) in Resource Group: $($this.ResourceGroup) in Subscription: $($this.SubscriptionName) with $($this.CurrentNodepoolCount) node pools and $($this.CurrentTotalNodeCount) nodes. Is private: $($this.IsClusterPrivate())"
     }
 
-    [AKSClusterResult] assess() {
+    [hashtable] assess() {
         $rules = Get-Content aksRules.json | ConvertFrom-Json
+        $res = @{}
 
         foreach ($ruleTuple in $rules.PSObject.Properties) {
-            $this.checkRule($ruleTuple.Name, $ruleTuple.Value)
+            $res[$ruleTuple.Name] = $this.checkRule($ruleTuple.Name, $ruleTuple.Value)
         }
 
         $this.Result | Format-Table
-        return $this.Result
+        return $res
     }
 
 

@@ -19,17 +19,19 @@ class ResourceCheck {
             $isExpected = $returnedValue -eq $rule.expected
             
             if ($isExpected) {
-                Write-Host "✅ $($name): $($returnedValue -eq $rule.expected ? $global:Pass : $global:Fail)" -ForegroundColor Green
+                Write-Host "✅ $($name): $global:Pass" -ForegroundColor Green
+                return $global:Pass
             }
             else {
                 # Write-Host "⚠️  $($name): $($returnedValue -eq $rule.expected ? $global:Pass : $global:Fail) Expected: $($rule.expected) but got: $($returnedValue)" -ForegroundColor Red
-                Write-Host "⚠️  $($name): $($returnedValue -eq $rule.expected ? $global:Pass : $global:Fail) - $($rule.explanation)" -ForegroundColor Red
+                Write-Host "⚠️  $($name): $global:Fail - $($rule.explanation)" -ForegroundColor Red
+                return $global:Fail
             }
             return $returnedValue
         }
         catch {
             Write-Host "⛔ $($name): $($global:Err). An error occured: $($_)" -ForegroundColor DarkRed
-            return $null
+            return $global:Err
         }
     }
 }
