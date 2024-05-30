@@ -1,4 +1,4 @@
-using module ./AKSClusterCheck.psm1
+using module ./AKS/AKSClusterCheck.psm1
 
 param (
     [Parameter(Mandatory = $false)][string]$OutPath = "",

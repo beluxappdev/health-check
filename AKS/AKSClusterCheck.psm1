@@ -1,5 +1,5 @@
-using module ./ResourceCheck.psm1
-using module ./CheckResults.psm1
+using module ../ResourceCheck.psm1
+using module ../CheckResults.psm1
 
 
 class AKSClusterCheck: ResourceCheck {
@@ -227,7 +227,7 @@ class AKSClusterCheck: ResourceCheck {
     }
 
     [CheckResults] assess() {
-        $rules = Get-Content aksRules.json | ConvertFrom-Json
+        $rules = Get-Content AKS/aksRules.json | ConvertFrom-Json
 
         $this.Results.Add("Name", $this.getClusterName())
         $this.Results.Add("Location", $this.getClusterLocation())
