@@ -65,7 +65,7 @@ foreach ($currentSubscription in $subscriptions) {
     Write-Host "***** Assessing the subscription $($currentSubscription.displayName) ($($currentSubscription.id)..." -ForegroundColor Cyan
     az account set -s $currentSubscription.SubscriptionId
 
-    $aksClusters = az aks list -o json --only-show-errors | ConvertFrom-Json #-AsHashTable
+    $aksClusters = az aks list -o json --only-show-errors | ConvertFrom-Json -AsHashTable
     foreach ($currentAKSCluster in $aksClusters) {
         Write-Host ""
         Write-Host "**** Assessing the AKS Cluster $($currentAKSCluster.name)..." -ForegroundColor Blue

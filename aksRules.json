@@ -92,7 +92,7 @@
   "AKS_Addon_KeyVaultSecretProvider": {
     "expected": true,
     "explanation": "Azure Key Vault secret provider should be used for storing and accessing secrets. For more information, see https://learn.microsoft.com/en-us/azure/aks/csi-secrets-store-driver",
-    "function": "hasKeyVaultProvider"
+    "function": "hasKeyVaultSecretProviderEnabled"
   },
 
   "AKS_Auth_EntraIDIntegrated": {

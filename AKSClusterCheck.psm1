@@ -23,6 +23,10 @@ class AKSClusterCheck: ResourceCheck {
         return $this.ClusterObject.nodeResourceGroup
     }
 
+    [string] getClusterLocation() {
+        return $this.ClusterObject.location
+    }
+
     [int] getNodepoolCount() {
         return $this.ClusterObject.agentPoolProfiles.Length
     }
@@ -35,6 +39,14 @@ class AKSClusterCheck: ResourceCheck {
         }
 
         return $totalNodeCount
+    }
+
+    [bool] isClusterProvisioned() {
+        return $this.ClusterObject.provisioningState -eq "Succeeded"
+    }
+
+    [bool] isClusterRunning() {
+        return $this.ClusterObject.powerState.code -eq "Running"
     }
 
     # Checks if the cluster is private
@@ -124,7 +136,7 @@ class AKSClusterCheck: ResourceCheck {
 
     # Checks if keyvault secret provider is enabled
     [bool] hasKeyVaultSecretProviderEnabled() {
-        return $this.ClusterObject.addonProfiles.azureKeyvaultSecretsProvider.enabled
+        return $null -ne $this.ClusterObject.addonProfiles -and $null -ne $this.ClusterObject.addonProfiles.azureKeyvaultSecretsProvider -and $this.ClusterObject.addonProfiles.azureKeyvaultSecretsProvider.enabled
     }
 
     # Checks if diagnostic settings are enabled
@@ -180,7 +192,7 @@ class AKSClusterCheck: ResourceCheck {
 
     # Check if an autoupgrade profile has been set
     [string] hasAutoUpgradeProfile() {
-        return $this.ClusterObject.autoUpgradeProfile -ne $null -and $this.ClusterObject.autoUpgradeProfile.upgradeChannel -ne $null
+        return $this.ClusterObject.autoUpgradeProfile -ne $null -and $this.ClusterObject.autoUpgradeProfile.upgradeChannel -ne $null -and $this.ClusterObject.autoUpgradeProfile.upgradeChannel.ToLower() -ne "none" 
     }
 
     # Checks if defender is enabled
@@ -217,7 +229,8 @@ class AKSClusterCheck: ResourceCheck {
     [CheckResults] assess() {
         $rules = Get-Content aksRules.json | ConvertFrom-Json
 
-        $this.Results.Add("Cluster_Name", $this.getClusterName())
+        $this.Results.Add("Name", $this.getClusterName())
+        $this.Results.Add("Location", $this.getClusterLocation())
         $this.Results.Add("Resource_Group", $this.getClusterResourceGroup())
         $this.Results.Add("Node_Resource_Group", $this.getNodeResourceGroup())
 
@@ -229,33 +242,3 @@ class AKSClusterCheck: ResourceCheck {
     }
 
 }
-
-# function Out($message) {
-#     Write-Host $message -NoNewline
-# }
-
-# Function to wrap the execution of a function, print the result in sdtout and return the same result. Also performs a comparison with the expected value (true by default)
-# function Wrap($fn, $name, $expected = $true) {
-#     Out "$($name): "
-#     $result
-#     try {
-#         $result = & $fn
-#         Out "$($result)"
-#         if ($result -ne $expected) {
-#             Write-Host "⚠️   Expected $($expected) but got $($result)"
-#         }
-#         else {
-#             Write-Host "✅"
-#         }
-#     }
-#     catch {
-#         $result = "Error"
-#         Write-Host "⛔ Error: $($_.Exception.Message)"
-#     }
-#     return $result
-# }
-
-# function PrintAndReturn($result, $message) {
-#     Write-Host "$($message): $($result)"
-#     return $result
-# }
