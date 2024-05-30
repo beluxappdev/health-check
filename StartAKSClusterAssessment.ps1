@@ -63,13 +63,18 @@ foreach ($currentSubscription in $subscriptions) {
     Write-Host "***** Assessing the subscription $($currentSubscription.displayName) ($($currentSubscription.id)..." -ForegroundColor Green
     az account set -s $currentSubscription.SubscriptionId
 
-    $aksClusters = az aks list -o json | ConvertFrom-Json -AsHashTable
+
+    $jsonAksClusters = az aks list -o json 
+    $jsonAksClusters | Out-File -FilePath "$Path\raw_$today.json" -Append
+    $aksClusters = $jsonAksClusters | ConvertFrom-Json -AsHashTable
+    
     foreach ($currentAKSCluster in $aksClusters) {
         Write-Host ""
         Write-Host "**** Assessing the AKS Cluster $($currentAKSCluster.Name)..." -ForegroundColor Blue
         $aksCluster = [AKSCluster]::new($currentAKSCluster, $currentSubscription.id, $currentSubscription.displayName)
 
         $aksCluster.assess() | Export-Csv -Path "$OutPath\assess_$today.csv" -NoTypeInformation -Append -Delimiter $csvDelimiter
+
     }
 }
 
