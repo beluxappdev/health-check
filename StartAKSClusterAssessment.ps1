@@ -65,7 +65,10 @@ foreach ($currentSubscription in $subscriptions) {
     Write-Host "***** Assessing the subscription $($currentSubscription.displayName) ($($currentSubscription.id)..." -ForegroundColor Cyan
     az account set -s $currentSubscription.SubscriptionId
 
-    $aksClusters = az aks list -o json --only-show-errors | ConvertFrom-Json -AsHashTable
+    $jsonAksClusters = az aks list -o json 
+    $jsonAksClusters | Out-File -FilePath "$Path\raw_$today.json" -Append
+    $aksClusters = $jsonAksClusters | ConvertFrom-Json -AsHashTable
+    
     foreach ($currentAKSCluster in $aksClusters) {
         Write-Host ""
         Write-Host "**** Assessing the AKS Cluster $($currentAKSCluster.name)..." -ForegroundColor Blue
@@ -73,7 +76,6 @@ foreach ($currentSubscription in $subscriptions) {
 
         $aksCluster.assess().GetAllResults() | Export-Csv -Path "$OutPath\assess_$today.csv" -NoTypeInformation -Append -Delimiter $csvDelimiter
         Write-Host ""
-
     }
 }
 
