@@ -66,7 +66,7 @@ foreach ($currentSubscription in $subscriptions) {
     az account set -s $currentSubscription.SubscriptionId
 
     $jsonAksClusters = az aks list -o json 
-    $jsonAksClusters | Out-File -FilePath "$Path\raw_$today.json" -Append
+    $jsonAksClusters | Out-File -FilePath "$OutPath\raw_$today.json" -Append
     $aksClusters = $jsonAksClusters | ConvertFrom-Json -AsHashTable
     
     foreach ($currentAKSCluster in $aksClusters) {
