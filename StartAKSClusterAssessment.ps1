@@ -63,9 +63,9 @@ $subscriptions = az account subscription list -o json --only-show-errors  | Conv
 foreach ($currentSubscription in $subscriptions) {
       
     Write-Host "***** Assessing the subscription $($currentSubscription.displayName) ($($currentSubscription.id)..." -ForegroundColor Cyan
-    az account set -s $currentSubscription.SubscriptionId
+    az account set -s $currentSubscription.SubscriptionId --only-show-errors 
 
-    $jsonAksClusters = az aks list -o json 
+    $jsonAksClusters = az aks list -o json --only-show-errors 
     $jsonAksClusters | Out-File -FilePath "$OutPath\raw_$today.json" -Append
     $aksClusters = $jsonAksClusters | ConvertFrom-Json -AsHashTable
     
