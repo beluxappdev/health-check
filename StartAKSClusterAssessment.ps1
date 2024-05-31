@@ -1,7 +1,9 @@
+using module ./AKS/AKSClusterCheck.psm1
+
 param (
     [Parameter(Mandatory = $false)][string]$OutPath = "",
     [Parameter(Mandatory = $false)][string]$csvDelimiter = ",",
-    [Parameter(Mandatory = $false)][ValidateSet("user", "sp")][string]$AuthType = "user",
+    [Parameter(Mandatory = $false)][ValidateSet("user", "sp", "none")][string]$AuthType = "none",
     [Parameter(Mandatory = $false)][string]$ClientId = "",
     [Parameter(Mandatory = $false)][string]$ClientSecret = "",
     [Parameter(Mandatory = $false)][string]$TenantId = ""
@@ -31,13 +33,13 @@ elseif ($AuthType -eq "user") {
         az login
     }
 }
+elseif ($AuthType -eq "none") {
+    Write-Host "Re-using existing Azure CLI session" 
+}
 else {
-    Write-Host "Invalid authentication type. Please use 'user' or 'sp'" -ForegroundColor Red
+    Write-Host "Invalid authentication type. Please use 'user', 'sp' or 'none'" -ForegroundColor Red
     exit
 }
-
-# Import AKSCluster.ps1
-. ./AKSCluster.ps1
 
 # Your code goes here
 $today = [DateTime]::Now.ToString("yyyy-MM-dd_HH-mm-ss")
@@ -49,32 +51,31 @@ if ($OutPath.Trim() -eq '' -or -not(Test-Path -Path $OutPath)) {
 
 
 
-Write-Host "Output Path: $OutPath" -ForegroundColor Green
+Write-Host "Output Path: $OutPath" -ForegroundColor Blue
 
 Start-Transcript -Path "$OutPath\log_$today.txt"
 
-Write-Host "******** Welcome to the Microsoft Azure Kubernetes Cluster assessment" -ForegroundColor Green
+Write-Host "******** Welcome to the Microsoft Azure Kubernetes Cluster assessment" -ForegroundColor Cyan
 
 
-$subscriptions = az account subscription list -o json  | ConvertFrom-Json
+$subscriptions = az account subscription list -o json --only-show-errors  | ConvertFrom-Json
 
 foreach ($currentSubscription in $subscriptions) {
       
-    Write-Host "***** Assessing the subscription $($currentSubscription.displayName) ($($currentSubscription.id)..." -ForegroundColor Green
-    az account set -s $currentSubscription.SubscriptionId
+    Write-Host "***** Assessing the subscription $($currentSubscription.displayName) ($($currentSubscription.id)..." -ForegroundColor Cyan
+    az account set -s $currentSubscription.SubscriptionId --only-show-errors 
 
-
-    $jsonAksClusters = az aks list -o json 
-    $jsonAksClusters | Out-File -FilePath "$Path\raw_$today.json" -Append
+    $jsonAksClusters = az aks list -o json --only-show-errors 
+    $jsonAksClusters | Out-File -FilePath "$OutPath\raw_$today.json" -Append
     $aksClusters = $jsonAksClusters | ConvertFrom-Json -AsHashTable
     
     foreach ($currentAKSCluster in $aksClusters) {
         Write-Host ""
-        Write-Host "**** Assessing the AKS Cluster $($currentAKSCluster.Name)..." -ForegroundColor Blue
-        $aksCluster = [AKSCluster]::new($currentAKSCluster, $currentSubscription.id, $currentSubscription.displayName)
+        Write-Host "**** Assessing the AKS Cluster $($currentAKSCluster.name)..." -ForegroundColor Blue
+        $aksCluster = [AKSClusterCheck]::new($currentSubscription.id, $currentSubscription.displayName, $currentAKSCluster)
 
-        $aksCluster.assess() | Export-Csv -Path "$OutPath\assess_$today.csv" -NoTypeInformation -Append -Delimiter $csvDelimiter
-
+        $aksCluster.assess().GetAllResults() | Export-Csv -Path "$OutPath\assess_$today.csv" -NoTypeInformation -Append -Delimiter $csvDelimiter
+        Write-Host ""
     }
 }
 

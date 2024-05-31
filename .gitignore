@@ -400,3 +400,4 @@ FodyWeavers.xsd
 out/*
 AKS_Assessment_*
 sample.json
+run.ps1
