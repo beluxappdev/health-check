@@ -220,6 +220,16 @@ class AKSClusterCheck: ResourceCheck {
         return $this.ClusterObject.networkProfile.loadBalancerSku -eq "Standard"
     }
 
+    [bool] hasBackupExtensionEnabled() {
+        $extensions = az k8s-extension list --cluster-type managedClusters --cluster-name $this.ClusterObject.name --resource-group $this.ClusterObject.resourceGroup -o json | ConvertFrom-Json
+        foreach ($extension in $extensions) {
+            if ($extension.name -eq "azure-aks-backup") {
+                return $true
+            }
+        }
+        return $false
+    }
+
 
     [string] toString() {
         return ""
