@@ -126,7 +126,9 @@ class AKSClusterCheck: ResourceCheck {
 
     # Checks if Container Insights is enabled
     [bool] isContainerInsightsEnabled() {
-        return  $this.ClusterObject.addonProfiles.omsAgent.enabled
+        $azureMonitorProfile = $null -ne $this.ClusterObject.azureMonitorProfile -and $null -ne $this.ClusterObject.azureMonitorProfile.containerInsights -and $this.ClusterObject.azureMonitorProfile.containerInsights.enabled
+        $addonProfile = $null -ne $this.ClusterObject.addonProfiles -and $null -ne $this.ClusterObject.addonProfiles.omsagent -and $this.ClusterObject.addonProfiles.omsagent.enabled
+        return $azureMonitorProfile -and $addonProfile
     }
 
     # Checks if Azure Policies are enabled
@@ -221,7 +223,7 @@ class AKSClusterCheck: ResourceCheck {
     }
 
     [bool] hasBackupExtensionEnabled() {
-        $extensions = az k8s-extension list --cluster-type managedClusters --cluster-name $this.ClusterObject.name --resource-group $this.ClusterObject.resourceGroup -o json | ConvertFrom-Json
+        $extensions = az k8s-extension list --cluster-type managedClusters --cluster-name $this.getClusterName() --resource-group $this.getClusterResourceGroup() -o json | ConvertFrom-Json
         foreach ($extension in $extensions) {
             if ($extension.name -eq "azure-aks-backup") {
                 return $true
