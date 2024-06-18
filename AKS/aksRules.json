@@ -1,12 +1,12 @@
 {
   "AKS_Running": {
     "expected": true,
-    "explanation": "The cluster should be running.",
+    "explanation": "The cluster should be running to get accurate results. Some results might be wrong due to the current state.",
     "function": "isClusterRunning"
   },
   "AKS_Provisioned": {
     "expected": true,
-    "explanation": "The cluster should be provisioned.",
+    "explanation": "The cluster should be provisioned to get accurate results. Some results might be wrong due to the current state.",
     "function": "isClusterProvisioned"
   },
   "AKS_Resiliency_Autoscaling": {
