@@ -1,4 +1,14 @@
 {
+  "AKS_Running": {
+    "expected": true,
+    "explanation": "The cluster should be running.",
+    "function": "isClusterRunning"
+  },
+  "AKS_Provisioned": {
+    "expected": true,
+    "explanation": "The cluster should be provisioned.",
+    "function": "isClusterProvisioned"
+  },
   "AKS_Resiliency_Autoscaling": {
     "expected": 0,
     "explanation": "Autoscaling should be enabled in the cluster for all nodepools. For more information, see https://learn.microsoft.com/en-us/azure/aks/cluster-autoscaler",
