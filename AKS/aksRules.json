@@ -1,4 +1,9 @@
 {
+  "AKS_AmountOfNodesinPools": {
+    "expected": true,
+    "explanation": "The cluster should have at least 3 nodepools for high availability.",
+    "function": "IsPoolMin3Nodes"
+  },
   "AKS_Running": {
     "expected": true,
     "explanation": "The cluster should be running to get accurate results. Some results might be wrong due to the current state.",
