@@ -1,8 +1,8 @@
 {
-  "AKS_AmountOfNodesinPools": {
+  "AKS_Resiliency_MinNodesPerPool": {
     "expected": true,
     "explanation": "The cluster should have at least 3 nodepools for high availability.",
-    "function": "IsPoolMin3Nodes"
+    "function": "hasMin3NodesPerPool"
   },
   "AKS_Running": {
     "expected": true,

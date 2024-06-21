@@ -41,7 +41,7 @@ class AKSClusterCheck: ResourceCheck {
         return $totalNodeCount
     }
 
-    [bool] IsPoolMin3Nodes() {
+    [bool] hasMin3NodesPerPool() {
         foreach ($nodePool in $this.ClusterObject.agentPoolProfiles) {
             if ($nodePool.minCount -lt 3) {
                 return $false
@@ -50,8 +50,6 @@ class AKSClusterCheck: ResourceCheck {
         return $true
     }
     
-    #create new function that goes through nodepools and checks the minimum if it has atleast 3 nodes. Range od min-max if min is 1 thats not good. If 1 nodepool has min<3 the entire test fails
-
     [bool] isClusterProvisioned() {
         return $this.ClusterObject.provisioningState -eq "Succeeded"
     }
