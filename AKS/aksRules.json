@@ -1,9 +1,4 @@
 {
-  "AKS_Resiliency_MinNodesPerPool": {
-    "expected": true,
-    "explanation": "The cluster should have at least 3 nodepools for high availability.",
-    "function": "hasMin3NodesPerPool"
-  },
   "AKS_Running": {
     "expected": true,
     "explanation": "The cluster should be running to get accurate results. Some results might be wrong due to the current state.",
@@ -34,7 +29,12 @@
     "explanation": "Backups should be enabled in the cluster. For more information, see https://learn.microsoft.com/en-us/azure/backup/azure-kubernetes-service-cluster-manage-backups",
     "function": "hasBackupExtensionEnabled"
   },
-
+  "AKS_Resiliency_MinNodesPerPool": {
+    "expected": true,
+    "explanation": "The cluster should have at least 3 nodepools for high availability.",
+    "function": "hasMin3NodesPerPool"
+  },
+  
   "AKS_Private_Cluster": {
     "expected": true,
     "explanation": "The cluster should be private. For more information, see https://learn.microsoft.com/en-us/azure/aks/private-clusters",
