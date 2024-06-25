@@ -31,10 +31,10 @@
   },
   "AKS_Resiliency_MinNodesPerPool": {
     "expected": true,
-    "explanation": "The cluster should have at least 3 nodepools for high availability.",
+    "explanation": "Each nodepool should have at least 3 nodes for high availability.",
     "function": "hasMin3NodesPerPool"
   },
-  
+
   "AKS_Private_Cluster": {
     "expected": true,
     "explanation": "The cluster should be private. For more information, see https://learn.microsoft.com/en-us/azure/aks/private-clusters",
