@@ -41,6 +41,15 @@ class AKSClusterCheck: ResourceCheck {
         return $totalNodeCount
     }
 
+    [bool] hasMin3NodesPerPool() {
+        foreach ($nodePool in $this.ClusterObject.agentPoolProfiles) {
+            if ($nodePool.minCount -lt 3) {
+                return $false
+            }
+        }
+        return $true
+    }
+    
     [bool] isClusterProvisioned() {
         return $this.ClusterObject.provisioningState -eq "Succeeded"
     }
