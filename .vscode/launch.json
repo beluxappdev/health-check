@@ -5,11 +5,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "PowerShell: Launch Script",
+            "name": "No Authentication",
             "type": "PowerShell",
             "request": "launch",
-            "script": "./StartAKSClusterAssessment.ps1",
-            "args": ["-AuthType", "none"]
+            "script": "./StartAssessment.ps1",
+            "args": ["-AuthType", "none" , "-Services", "aks"]
+        },
+        {
+            "name": "No Authentication all services",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "./StartAssessment.ps1",
+            "args": ["-AuthType", "none" , "-Services", "all"]
         }
     ]
 }
