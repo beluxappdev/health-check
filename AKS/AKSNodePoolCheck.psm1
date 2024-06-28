@@ -25,6 +25,14 @@ class AKSNodePoolCheck: ResourceCheck {
         return $this.NodePoolObject.count
     }
 
+    [string] getVMSize() {
+        return $this.NodePoolObject.vmSize
+    }
+
+    [string] getMode() {
+        return $this.NodePoolObject.mode
+    }
+
     [bool] hasAutoscalingEnabled() {
         return $this.NodePoolObject.enableAutoScaling
     }
@@ -40,6 +48,13 @@ class AKSNodePoolCheck: ResourceCheck {
         return $this.NodePoolObject.minCount -ge 3
     }
 
+    [bool] hasPublicIPEnabled() {
+        return $this.NodePoolObject.enableNodePublicIp
+    }
+
+    [bool] hasEphemeralOSDiskEnabled() {
+        return $this.NodePoolObject.osDiskType -eq "Ephemeral"
+    }
 
     [CheckResults] assess() {
         $rules = Get-Content AKS/aksNodePoolRules.json | ConvertFrom-Json
@@ -47,6 +62,8 @@ class AKSNodePoolCheck: ResourceCheck {
         $this.Results.Add("Cluster Name", $this.getClusterName())
         $this.Results.Add("Node Pool Name", $this.getNodePoolName())
         $this.Results.Add("Node Count", $this.getNodeCount())
+        $this.Results.Add("VM Size", $this.getVMSize())
+        $this.Results.Add("Mode", $this.getMode())
 
         foreach ($ruleTuple in $rules.PSObject.Properties) {
             $this.Results.Add($ruleTuple.Name, $this.checkRule($ruleTuple.Name, $ruleTuple.Value))
