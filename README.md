@@ -65,19 +65,14 @@ level agreements guaranteed by the hosted applications in the future.
 
 ### Permissions
 
-In order to complete the assessment, the user must have at least Reader
-permission/role over the Azure Kubernetes Service resources
+In order to complete the assessment, the user/service principal should be
+`Reader` on the subscriptions that you want to assess.
 
 ### Execution
 
-Login to the Azure CLI and execute the script
-
 ```powershell
-az login # -t [tenant id] (optional)
-
 # Optionally specify the output path and the CSV Delimiter as argument
-.\StartAKSClusterAssessment.ps1 #-OutPath "C:\MyPath" -csvDelimiter ","
-
+.\StartAssessment.ps1 #-OutPath "C:\MyPath" -csvDelimiter ","
 ```
 
 ### Parameters
@@ -90,12 +85,13 @@ az login # -t [tenant id] (optional)
 | ClientId     | Only if AuthType is `sp` |                  | The client ID for service principal authentication. Required if AuthType is `sp`                                                                                                                                                                                                    |
 | ClientSecret | Only if AuthType is `sp` |                  | The client secret for service principal authentication.                                                                                                                                                                                                                             |
 | TenantId     | Only if AuthType is `sp` |                  | The tenant ID for service principal authentication.                                                                                                                                                                                                                                 |
+| Services     | No                       | `all`            | A comma-separated list of services to check. Currently supported services are:<br> • `aks`<br> • `apim`                                                                                                                                                                             |
 
 ### Output
 
-An output folder named `AKS_Assessment_YYYY-MM-DD_HH-mm-ss` will be created for
-each assessment execution. The folder will contain the following files:
+An output folder named `Assessment_YYYY-MM-DD_HH-mm-ss` will be created for each
+assessment execution. The folder will contain the following files:
 
-- `assess_YYYY-MM-DD_HH-mm-ss.csv` - CSV Results of the assessment
+- `<SERVICE>_assess_YYYY-MM-DD_HH-mm-ss.csv` - CSV Results of the assessment
+- `<SERVICE>_raw_YYYY-MM-DD_HH-mm-ss.json` - Raw JSON of the analyzed resources
 - `log_YYYY-MM-DD_HH-mm-ss.txt` - Transcript of the PowerShell execution
-- `raw_YYYY-MM-DD_HH-mm-ss.json` - Raw JSON of the analyzed clusters
