@@ -19,5 +19,16 @@ foreach ($currentSubscription in $subscriptions) {
 
         $aksCluster.assess().GetAllResults() | Export-Csv -Path "$OutPath\aks_assess_$today.csv" -NoTypeInformation -Append -Delimiter $csvDelimiter
         Write-Host ""
+
+        $jsonAksNodePools = az aks nodepool list --cluster-name $currentAKSCluster.name -g $currentAKSCluster.resourceGroup -o json --only-show-errors
+        $aksNodePools = $jsonAksNodePools | ConvertFrom-Json -AsHashTable
+
+        foreach ($currentNodePool in $aksNodePools) {
+            Write-Host "**** Assessing the Node Pool $($currentNodePool.name) from cluster $($currentAKSCluster.name)" -ForegroundColor Blue
+            $aksNodePool = [AKSNodePoolCheck]::new($currentSubscription.id, $currentSubscription.displayName, $currentAKSCluster.name, $currentNodePool)
+
+            $aksNodePool.assess().GetAllResults() | Export-Csv -Path "$OutPath\aks_nodepool_assess_$today.csv" -NoTypeInformation -Append -Delimiter $csvDelimiter
+            Write-Host ""
+        }
     }
 }

@@ -1,4 +1,5 @@
 using module ./AKS/AKSClusterCheck.psm1
+using module ./AKS/AKSNodePoolCheck.psm1
 using module ./APIM/APIMCheck.psm1
 
 
