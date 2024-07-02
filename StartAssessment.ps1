@@ -69,7 +69,7 @@ else {
 
 
 foreach ($svc in $servicesList) {
-    if ($allSupportedServices -contains $svc) {
+    if ($allSupportedServices -contains $svc.ToLower()) {
         $svcUpper = $svc.ToUpper()
         . "./$svcUpper/Start${svcUpper}Assessment.ps1"
     }
