@@ -3,45 +3,45 @@
     "expected": true,
     "explanation": "The server should be integrated with Azure Active Directory for authentication and authorization.",
     "function": "hasAADIntegrationEnabled"
-    },
+  },
   "SQL_Server_Auditing": {
     "expected": true,
     "explanation": "The server should have auditing enabled.",
     "function": "hasAuditingEnabled"
-    },
-    "SQL_Server_TLS_1.2": {
+  },
+  "SQL_Server_TLS_1.2": {
     "expected": true,
     "explanation": "The server should have TLS 1.2 enabled.",
     "function": "hasMinimumTLSVersion12"
-    },
-    "SQL_Server_Network_Access": {
+  },
+  "SQL_Server_Network_Access": {
     "expected": true,
     "explanation": "The server should have public network access disabled.",
     "function": "hasPublicNetworkAccessDisabled"
-    },
-    "SQL_Server_Azure_IP_Rules": {
+  },
+  "SQL_Server_Azure_IP_Rules": {
     "expected": true,
     "explanation": "The server should have Azure IP rules enabled.",
     "function": "hasAzureIPRulesEnabled"
-    },
-    "SQL_Server_Outbound_Network_Access": {
+  },
+  "SQL_Server_Outbound_Network_Access": {
     "expected": true,
     "explanation": "The server should have restrictions on outbound network access disabled.",
     "function": "hasrestrictOutboundNetworkAccessDisabled"
-    },
-    "SQL_Server_Private_Endpoint_Connections": {
+  },
+  "SQL_Server_Private_Endpoint_Connections": {
     "expected": true,
     "explanation": "The server should have private endpoint connections enabled.",
     "function": "hasPrivateEndpointConnectionsEnabled"
-    },
-    "SQL_Server_Firewall_Rules": {
+  },
+  "SQL_Server_Firewall_Rules": {
     "expected": true,
     "explanation": "The server should have firewall rules enabled, no more than 10.",
     "function": "hasFirewallRulesEnabled"
-    },
-    "SQL_Firewall_IP_Range" : {
+  },
+  "SQL_Firewall_IP_Range": {
     "expected": true,
     "explanation": "The server should have a firewall IP range set, no more than 10 IPs.",
     "function": "hasFirewallIPDifferenceLessThan10"
-    }
   }
+}
