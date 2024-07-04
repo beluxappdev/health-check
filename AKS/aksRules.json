@@ -83,6 +83,11 @@
     "explanation": "Auto-upgrade should be enabled in the cluster. For more information, see https://learn.microsoft.com/en-us/azure/aks/auto-upgrade-cluster",
     "function": "hasAutoUpgradeProfile"
   },
+  "AKS_Compliance_MaintenanceWindows": {
+    "expected": true,
+    "explanation": "Maintenance windows should be configured in the cluster. For more information, see https://learn.microsoft.com/en-us/azure/aks/planned-maintenance",
+    "function": "hasMaintenanceWindows"
+  },
   "AKS_Compliance_SLA": {
     "expected": true,
     "explanation": "The cluster should have a service level agreement (SLA). For more information, see https://learn.microsoft.com/en-us/azure/aks/free-standard-pricing-tiers",
