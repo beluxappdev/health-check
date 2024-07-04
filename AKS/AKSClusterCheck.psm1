@@ -241,6 +241,11 @@ class AKSClusterCheck: ResourceCheck {
         return $false
     }
 
+    [bool] hasMaintenanceWindows() {
+        $windows = az aks maintenanceconfiguration list --resource-group $this.getClusterResourceGroup() --cluster-name $this.getClusterName() -o json | ConvertFrom-Json
+        return $windows.Length -gt 0
+    }
+
 
     [string] toString() {
         return ""
