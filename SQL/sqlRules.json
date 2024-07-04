@@ -1,47 +1,42 @@
 {
   "SQL_Server_Auth_EntraIDIntegrated": {
     "expected": true,
-    "explanation": "The server should be integrated with Azure Active Directory for authentication and authorization.",
+    "explanation": "The server should be integrated with Azure Active Directory for authentication and authorization. For more information: https://learn.microsoft.com/en-us/sql/relational-databases/security/authentication-access/azure-ad-authentication-sql-server-overview?view=sql-server-ver16",
     "function": "hasAADIntegrationEnabled"
   },
-  "SQL_Server_Auditing": {
+  "SQL_Server_Auditing" : {
     "expected": true,
-    "explanation": "The server should have auditing enabled.",
+    "explanation": "The server should have auditing enabled. For more information: https://learn.microsoft.com/en-us/sql/relational-databases/security/auditing/sql-server-audit-database-engine?view=sql-server-ver16",
     "function": "hasAuditingEnabled"
   },
   "SQL_Server_TLS_1.2": {
     "expected": true,
-    "explanation": "The server should have TLS 1.2 enabled.",
+    "explanation": "The server should have TLS 1.2 enabled. For more information: https://learn.microsoft.com/en-us/sql/database-engine/configure-windows/certificate-overview?view=sql-server-ver16",
     "function": "hasMinimumTLSVersion12"
   },
   "SQL_Server_Network_Access": {
     "expected": true,
-    "explanation": "The server should have public network access disabled.",
+    "explanation": "The server should have public network access disabled. For more information: https://learn.microsoft.com/en-us/azure/azure-sql/database/connectivity-settings?view=azuresql&tabs=azure-portal ",
     "function": "hasPublicNetworkAccessDisabled"
-  },
-  "SQL_Server_Azure_IP_Rules": {
-    "expected": true,
-    "explanation": "The server should have Azure IP rules enabled.",
-    "function": "hasAzureIPRulesEnabled"
   },
   "SQL_Server_Outbound_Network_Access": {
     "expected": true,
-    "explanation": "The server should have restrictions on outbound network access disabled.",
+    "explanation": "The server should have restrictions on outbound network access disabled. For more information: https://learn.microsoft.com/en-us/sql/sql-server/install/configure-the-windows-firewall-to-allow-sql-server-access?view=sql-server-ver16 ",
     "function": "hasrestrictOutboundNetworkAccessDisabled"
   },
   "SQL_Server_Private_Endpoint_Connections": {
     "expected": true,
-    "explanation": "The server should have private endpoint connections enabled.",
+    "explanation": "The server should have private endpoint connections enabled. For more information: https://learn.microsoft.com/en-us/azure/azure-sql/database/private-endpoint-overview?view=azuresql",
     "function": "hasPrivateEndpointConnectionsEnabled"
   },
   "SQL_Server_Firewall_Rules": {
     "expected": true,
-    "explanation": "The server should have firewall rules enabled, no more than 10.",
-    "function": "hasFirewallRulesEnabled"
+    "explanation": "The server should have no more than 10 firewall rules enabled. For more information: https://learn.microsoft.com/en-us/sql/sql-server/install/configure-the-windows-firewall-to-allow-sql-server-access?view=sql-server-ver16",
+    "function": "hasMax10FirewallRulesEnabled"
   },
-  "SQL_Firewall_IP_Range": {
+    "SQL_Firewall_IP_Range": {
     "expected": true,
-    "explanation": "The server should have a firewall IP range set, no more than 10 IPs.",
-    "function": "hasFirewallIPDifferenceLessThan10"
+    "explanation": "The server should have a firewall IP range set, no more than 10 IPs. For more information: https://learn.microsoft.com/en-us/sql/sql-server/install/configure-the-windows-firewall-to-allow-sql-server-access?view=sql-server-ver16",
+    "function": "firewallHasMax10AuthorizedIPs"
   }
 }

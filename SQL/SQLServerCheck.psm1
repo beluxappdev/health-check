@@ -17,25 +17,20 @@ class SQLServerCheck: ResourceCheck {
         return $this.ServerObject.resourceGroup
     }
 
+    # Checks if Auditing on server level is enabled
+    [bool] hasAuditingEnabled() {
+        $ServerAuditing =  az sql server audit-policy show --name $this.ServerObject.name --resource-group $this.ServerObject.resourceGroup -o json | ConvertFrom-Json
+        return $ServerAuditing.ServerObject.state -eq "Enabled"
+    }
+
     # Checks if Azure AD integration is enabled
-    # [bool] hasAADIntegrationEnabled() { return [string]::IsNullOrEmpty($this.ServerObject.azureAdOnlyAuthentication) -eq $false}
     [bool] hasAADIntegrationEnabled() {
         return -not $this.ServerObject.azureAdOnlyAuthentication
-    }
-    
-    #Checks if auditing is enabled
-    [bool] hasAuditingEnabled() {
-        return [string]::IsNullOrEmpty($this.ServerObject.auditPolicy) -eq $false
     }
 
     #Checks if Minimum TLS version is set to 1.2
     [bool] hasMinimumTLSVersion12() {
         return $this.ServerObject.minimalTlsVersion -eq "1.2"
-    }
-
-    #Checks if public network access is disabled
-    [bool] hasPublicNetworkAccessDisabled() {
-        return $this.ServerObject.publicNetworkAccess -eq "Disabled"
     }
 
     #Checks if restrictions on Outbound Network Access are disabeled
@@ -53,33 +48,32 @@ class SQLServerCheck: ResourceCheck {
         return $this.ServerObject.privateEndpointConnections.Count -gt 0
     }
 
+    #Checks if public network access is disabled
+    [bool] hasPublicNetworkAccessDisabled() {
+        return $this.ServerObject.publicNetworkAccess -eq "Disabled"
+    }
+
     #Check if Firewall rules are enabled
-    [bool] hasFirewallRulesEnabled() {
-        return $this.ServerObject.firewallRules.Count -gt 0 -and $this.ServerObject.firewallRules.Count -lt 10
+    [bool] hasMax10FirewallRulesEnabled() {
+        $firewallRules = az sql server firewall-rule list -g  $this.ServerObject.resourceGroup -s $this.ServerObject.name -o json | ConvertFrom-Json
+        $totalRuleCount = 0
+        foreach ($rule in $firewallRules){
+            $totalRuleCount = $totalRuleCount + 1
+        }
+        return $totalRuleCount -lt 10
     }
 
     #Check if Firewall start IP and end IP difference is less than 10
-    [bool] hasFirewallIPDifferenceLessThan10() {
-        foreach ($rule in $this.ServerObject.firewallRules) {
-            $startIP = $rule.startIpAddress.Split(".")[3]
-            $endIP = $rule.endIpAddress.Split(".")[3]
-            if ([math]::Abs([int]$startIP - [int]$endIP) -gt 10) {
-                return $false
-            }
-        }
-        return $true
-    }
-    # [bool] hasFirewallIPDifferenceLessThan10() {
-    #     $this.ServerObject.firewallRules | ForEach-Object {
-    #         $startIP = $_.startIpAddress.Split(".")[3]
-    #         $endIP = $_.endIpAddress.Split(".")[3]
-    #         if ([math]::Abs($startIP - $endIP) -gt 10) {
-    #             return $false
-    #         }
-    #     }
-    #     return $true
-    # }
-
+    [bool] firewallHasMax10AuthorizedIPs() {
+        $firewallRules = az sql server firewall-rule list -g  $this.ServerObject.resourceGroup -s $this.ServerObject.name -o json | ConvertFrom-Json  
+        $totalIPCount = 0  
+        foreach ($rule in $firewallRules) {  
+            $startIP = $rule.startIpAddress.Split(".")[3]  
+            $endIP = $rule.endIpAddress.Split(".")[3]  
+            $totalIPCount = $totalIPCount + [math]::Abs([int]$endIP - [int]$startIP) + 1  
+        }  
+        return $totalIPCount -le 10  
+    }  
 
     [string] toString() {
         return ""
