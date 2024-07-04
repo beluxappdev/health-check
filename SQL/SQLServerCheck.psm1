@@ -24,13 +24,13 @@ class SQLServerCheck: ResourceCheck {
     }
 
     # Checks if Azure AD integration is enabled
-    [bool] hasAADIntegrationEnabled() {
+    [bool] hasEntraIDIntegrationEnabled() {
         return -not $this.ServerObject.azureAdOnlyAuthentication
     }
 
     #Checks if Minimum TLS version is set to 1.2
     [bool] hasMinimumTLSVersion12() {
-        return $this.ServerObject.minimalTlsVersion -eq "1.2"
+        return $this.ServerObject.minimalTlsVersion -ge "1.2"
     }
 
     #Checks if restrictions on Outbound Network Access are disabeled
