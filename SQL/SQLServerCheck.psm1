@@ -19,7 +19,7 @@ class SQLServerCheck: ResourceCheck {
 
     # Checks if Auditing on server level is enabled
     [bool] hasAuditingEnabled() {
-        $ServerAuditing =  az sql server audit-policy show --name $this.ServerObject.name --resource-group $this.ServerObject.resourceGroup -o json | ConvertFrom-Json
+        $ServerAuditing =  az sql server audit-policy show --name $this.getServerName() --resource-group $this.getServerResourceGroup() -o json | ConvertFrom-Json
         return $ServerAuditing.ServerObject.state -eq "Enabled"
     }
 
@@ -55,7 +55,8 @@ class SQLServerCheck: ResourceCheck {
 
     #Check if Firewall rules are enabled
     [bool] hasMax10FirewallRulesEnabled() {
-        $firewallRules = az sql server firewall-rule list -g  $this.ServerObject.resourceGroup -s $this.ServerObject.name -o json | ConvertFrom-Json
+        $firewallRules = az sql server firewall-rule list -g  $this.getServerResourceGroup() -s $this.getServerName() -o json | ConvertFrom-Json  
+
         $totalRuleCount = 0
         foreach ($rule in $firewallRules){
             $totalRuleCount = $totalRuleCount + 1
@@ -65,7 +66,8 @@ class SQLServerCheck: ResourceCheck {
 
     #Check if Firewall start IP and end IP difference is less than 10
     [bool] firewallHasMax10AuthorizedIPs() {
-        $firewallRules = az sql server firewall-rule list -g  $this.ServerObject.resourceGroup -s $this.ServerObject.name -o json | ConvertFrom-Json  
+        $firewallRules = az sql server firewall-rule list -g  $this.getServerResourceGroup() -s $this.getServerName() -o json | ConvertFrom-Json  
+  
         $totalIPCount = 0  
         foreach ($rule in $firewallRules) {  
             $startIP = $rule.startIpAddress.Split(".")[3]  

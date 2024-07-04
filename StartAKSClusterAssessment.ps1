@@ -93,7 +93,7 @@ foreach ($currentSubscription in $subscriptions) {
     az account set -s $currentSubscription.SubscriptionId --only-show-errors 
 
     $jsonSQLservers = az sql server list -o json --only-show-errors 
-    $jsonSQLservers | Out-File -FilePath "$OutPath\raw_$today.json" -Append
+    $jsonSQLservers | Out-File -FilePath "$OutPath\sql_server_raw_$today.json" -Append  
     $fullservers = $jsonSQLservers | ConvertFrom-Json -AsHashTable
     
     foreach ($currentserver in $fullservers) {
