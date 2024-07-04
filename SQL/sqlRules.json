@@ -6,11 +6,12 @@
   },
   "SQL_Server_Security_Auditing" : {
     "expected": true,
-    "explanation": "The server should have auditing enabled. For more information:  https://learn.microsoft.com/en-us/azure/azure-sql/database/auditing-setup?view=azuresql"
+    "explanation": "The server should have auditing enabled. For more information: https://learn.microsoft.com/en-us/azure/azure-sql/database/auditing-setup?view=azuresql",
+    "function": "hasAuditingEnabled"
   },
   "SQL_Server_Security_TLS1.2": {
     "expected": true,
-    "explanation": "The server should have TLS 1.2 enabled. For more information:  https://learn.microsoft.com/en-us/azure/azure-sql/database/connectivity-settings?view=azuresql&tabs=azure-portal#minimal-tls-version",
+    "explanation": "The server should have TLS 1.2 enabled. For more information: https://learn.microsoft.com/en-us/azure/azure-sql/database/connectivity-settings?view=azuresql&tabs=azure-portal#minimal-tls-version",
     "function": "hasMinimumTLSVersion12"
   },
   "SQL_Server_Security_NetworkAccess": {
