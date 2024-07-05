@@ -1,6 +1,7 @@
 using module ./AKS/AKSClusterCheck.psm1
 using module ./AKS/AKSNodePoolCheck.psm1
 using module ./APIM/APIMCheck.psm1
+using module ./SQL/SQLServerCheck.psm1
 
 
 param (
@@ -14,7 +15,7 @@ param (
 
 )
 
-$allSupportedServices = [string[]]@("aks", "apim") # Add more supported services here
+$allSupportedServices = [string[]]@("aks", "apim", "sql") # Add more supported services here
 
 # Check if the Azure CLI is installed
 if (-not(Get-Command az)) {
