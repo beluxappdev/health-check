@@ -30,7 +30,8 @@ class SQLServerCheck: ResourceCheck {
 
     #Checks if Minimum TLS version is set to 1.2
     [bool] hasMinimumTLSVersion12() {
-        return $this.ServerObject.minimalTlsVersion -ge "1.2"
+        $numericVersion = [double]::Parse($this.ServerObject.minimalTlsVersion, [Globalization.CultureInfo]::InvariantCulture)
+        return $numericVersion -ge 1.2
     }
 
     #Checks if restrictions on Outbound Network Access are disabeled
