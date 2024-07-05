@@ -21,7 +21,7 @@
   },
   "SQL_Server_Security_OutboundNetworkAccess": {
     "expected": true,
-    "explanation": "The server should have restrictions on outbound network access disabled. For more information: https://learn.microsoft.com/en-us/sql/sql-server/install/configure-the-windows-firewall-to-allow-sql-server-access?view=sql-server-ver16 ",
+    "explanation": "The server should have restrictions on outbound network access disabled. For more information:  https://learn.microsoft.com/en-us/azure/azure-sql/database/outbound-firewall-rule-overview ",
     "function": "hasrestrictOutboundNetworkAccessDisabled"
   },
   "SQL_Server_Security_PrivateEndpointConnections": {
