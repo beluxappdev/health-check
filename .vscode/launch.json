@@ -9,7 +9,7 @@
             "type": "PowerShell",
             "request": "launch",
             "script": "./StartAssessment.ps1",
-            "args": ["-AuthType", "none" , "-Services", "aks"]
+            "args": ["-AuthType", "none" , "-Services", "sql"]
         },
         {
             "name": "No Authentication all services",
