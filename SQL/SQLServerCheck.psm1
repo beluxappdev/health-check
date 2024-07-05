@@ -20,7 +20,7 @@ class SQLServerCheck: ResourceCheck {
     # Checks if Auditing on server level is enabled
     [bool] hasAuditingEnabled() {
         $ServerAuditing =  az sql server audit-policy show --name $this.getServerName() --resource-group $this.getServerResourceGroup() -o json | ConvertFrom-Json
-        return $ServerAuditing.ServerObject.state -eq "Enabled"
+        return $ServerAuditing.state -eq "Enabled"
     }
 
     # Checks if Azure AD integration is enabled
