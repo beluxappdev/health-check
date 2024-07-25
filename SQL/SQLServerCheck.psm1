@@ -17,6 +17,10 @@ class SQLServerCheck: ResourceCheck {
         return $this.ServerObject.resourceGroup
     }
 
+    [string] getServerLocation() {
+        return $this.ServerObject.location
+    }
+
     # Checks if Auditing on server level is enabled
     [bool] hasAuditingEnabled() {
         $ServerAuditing =  az sql server audit-policy show --name $this.getServerName() --resource-group $this.getServerResourceGroup() -o json | ConvertFrom-Json
@@ -87,6 +91,7 @@ class SQLServerCheck: ResourceCheck {
 
         $this.Results.Add("Name", $this.getServerName())
         $this.Results.Add("Resource_Group", $this.getServerResourceGroup())
+        $this.Results.Add("Location", $this.getServerLocation)
 
         foreach ($ruleTuple in $rules.PSObject.Properties) {
             $this.Results.Add($ruleTuple.Name, $this.checkRule($ruleTuple.Name, $ruleTuple.Value))

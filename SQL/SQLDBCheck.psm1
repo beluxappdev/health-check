@@ -40,10 +40,8 @@ class SQLDBCheck: ResourceCheck {
 
     # Checks if autoPauseDelay is enabled
     [bool] hasAutopauseDelayEnabled() {
-        $DBSku = az sql db show --name $this.getDBName() --resource-group $this.getDBResourceGroup() --server $this.getDBServerName() --query 'sku' --output json | ConvertFrom-Json
-        if ($DBSku.tier -eq 'GeneralPurpose' -and $DBSku.family -eq 'Gen5') {
-            $DBProperties = az sql db show --name $this.getDBName() --resource-group $this.getDBResourceGroup() --server $this.getDBServerName() --query 'autoPauseDelay' --output json | ConvertFrom-Json
-            return $DBProperties -ne $null
+        if ($this.sku.tier -eq 'GeneralPurpose' -and $this.sku.family -eq 'Gen5') {
+            return $this.autoPauseDelay -ne $null
         } else {
             return $false
         }
@@ -63,16 +61,16 @@ class SQLDBCheck: ResourceCheck {
 
     #Checks if there are replica's configured
     [bool] hasReplicasConfigured(){
-        $DBReplica = az sql db replica list-links --name $this.getDBName --server $this.getDBServerName --resource-group $this.getDBResourceGroup 
-        return $DBReplica -ne $null
+        $DBReplica = az sql db replica list-links --name $this.getDBName() --server $this.getDBServerName() --resource-group $this.getDBResourceGroup() 
+        return $DBReplica -gt 0
     }
 
     #Checks database size REWORK THIS CHECK 
-    [bool] isDatabaseSizeWithinLimit(){
-        $databaseSizeInMB = az sql db show --name $this.getDBName --server $this.getDBServerName --resource-group $this.getDBResourceGroup --query maxSizeBytes --output tsv | ForEach-Object { [int]$_ / 1MB }
-        $limitInMB = 5000 #check currently set max set limit, more than 90% the check should fail
-        return $databaseSizeInMB -le $limitInMB
-    }
+    # [bool] isDatabaseSizeWithinLimit(){
+    #     $databaseSizeInMB = az sql db show --name $this.getDBName() --server $this.getDBServerName() --resource-group $this.getDBResourceGroup() --query maxSizeBytes --output tsv | ForEach-Object { [int]$_ / 1MB }
+    #     $limitInMB = 5000 #check currently set max set limit, more than 90% the check should fail
+    #     return $databaseSizeInMB -le $limitInMB
+    # }
 
     [string] toString() {
         return ""
@@ -82,7 +80,9 @@ class SQLDBCheck: ResourceCheck {
         $rules = Get-Content SQL/sqlDBRules.json | ConvertFrom-Json
 
         $this.Results.Add("Name", $this.getDBName())
+        $this.Results.Add("Server", $this.getDBServerName())
         $this.Results.Add("Resource_Group", $this.getDBResourceGroup())
+        $this.Results.Add("Name", $this.getDBLocation())
 
         foreach ($ruleTuple in $rules.PSObject.Properties) {
             $this.Results.Add($ruleTuple.Name, $this.checkRule($ruleTuple.Name, $ruleTuple.Value))
