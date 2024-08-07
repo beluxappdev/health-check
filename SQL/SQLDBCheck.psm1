@@ -65,12 +65,23 @@ class SQLDBCheck: ResourceCheck {
         return $DBReplica -gt 0
     }
 
-    #Checks database size REWORK THIS CHECK 
-    # [bool] isDatabaseSizeWithinLimit(){
-    #     $databaseSizeInMB = az sql db show --name $this.getDBName() --server $this.getDBServerName() --resource-group $this.getDBResourceGroup() --query maxSizeBytes --output tsv | ForEach-Object { [int]$_ / 1MB }
-    #     $limitInMB = 5000 #check currently set max set limit, more than 90% the check should fail
-    #     return $databaseSizeInMB -le $limitInMB
-    # }
+
+    # Checks if the database size exceeds 90% of the limit
+    [bool] isDatabaseSizeWithinLimit() {
+        $databaseSizeInBytes = az sql db show --name $this.getDBName() --server $this.getDBServerName() --resource-group $this.getDBResourceGroup() --query 'properties.currentServiceObjectiveName' --output tsv
+        $maxSizeInBytes = az sql db show --name $this.getDBName() --server $this.getDBServerName() --resource-group $this.getDBResourceGroup() --query 'properties.maxSizeBytes' --output tsv
+
+        if ($databaseSizeInBytes -eq $null -or $maxSizeInBytes -eq $null) {
+            return $false
+        }
+
+        $databaseSizeInMB = [math]::Round($databaseSizeInBytes / 1MB, 2)
+        $maxSizeInMB = [math]::Round($maxSizeInBytes / 1MB, 2)
+        $threshold = $maxSizeInMB * 0.9
+
+        return $databaseSizeInMB -le $threshold
+    }
+
 
     [string] toString() {
         return ""
