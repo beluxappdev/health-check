@@ -27,21 +27,16 @@ class SQLDBCheck: ResourceCheck {
         return $this.DBObject.location
     }
 
-    [string] getDBServerName() {
-        #DBObject needs to access its server's name
-        return $this.getServerName()
-    }
-
     # Checks if Auditing on server level is enabled
     [bool] hasAuditingDBEnabled() {
-        $DBAuditing =  az sql db audit-policy show --name $this.getDBName --resource-group $this.getDBResourceGroup() --server $this.getServerName() --query 'state' -o json | ConvertFrom-Json 
+        $DBAuditing =  az sql db audit-policy show --name $this.getDBName() --resource-group $this.getDBResourceGroup() --server $this.getServerName() --query 'state' -o json | ConvertFrom-Json 
         return $DBAuditing -eq "Enabled"
     }
 
     # Checks if autoPauseDelay is enabled
     [bool] hasAutopauseDelayEnabled() {
-        if ($this.sku.tier -eq 'GeneralPurpose' -and $this.sku.family -eq 'Gen5') {
-            return $this.autoPauseDelay -ne $null
+        if ($this.DBObject.sku.tier -eq 'GeneralPurpose' -and $this.DBObject.sku.family -eq 'Gen5') {
+            return $this.DBObject.autoPauseDelay -ne $null
         } else {
             return $false
         }
@@ -49,27 +44,27 @@ class SQLDBCheck: ResourceCheck {
 
     # Checks if Back Ups are enabled
     [bool] hasBackUpsEnabled() {
-        $DBbackupJson = az sql db ltr-backup list --location $this.getDBLocation() --resource-group $this.getDBResourceGroup() --server $this.getDBServerName() | ConvertFrom-Json
+        $DBbackupJson = az sql db ltr-backup list --location $this.getDBLocation() --resource-group $this.getDBResourceGroup() --server $this.getServerName() | ConvertFrom-Json
         return $DBbackupJson.count -gt 0
     }
 
     # Checks if SQL TDE is enabled
     [bool] hasTDEenabled(){
-        $DBTDE = az sql db tde show --database $this.getDBName() --server $this.getDBServerName() --resource-group $this.getDBResourceGroup() --query 'state'  -o json | ConvertFrom-Json
+        $DBTDE = az sql db tde show --database $this.getDBName() --server $this.getServerName() --resource-group $this.getDBResourceGroup() --query 'state'  -o json | ConvertFrom-Json
         return $DBTDE -eq "Enabled"
     }
 
     #Checks if there are replica's configured
     [bool] hasReplicasConfigured(){
-        $DBReplica = az sql db replica list-links --name $this.getDBName() --server $this.getDBServerName() --resource-group $this.getDBResourceGroup() 
+        $DBReplica = az sql db replica list-links --name $this.getDBName() --server $this.getServerName() --resource-group $this.getDBResourceGroup() 
         return $DBReplica -gt 0
     }
 
 
     # Checks if the database size exceeds 90% of the limit
     [bool] isDatabaseSizeWithinLimit() {
-        $databaseSizeInBytes = az sql db show --name $this.getDBName() --server $this.getDBServerName() --resource-group $this.getDBResourceGroup() --query 'properties.currentServiceObjectiveName' --output tsv
-        $maxSizeInBytes = az sql db show --name $this.getDBName() --server $this.getDBServerName() --resource-group $this.getDBResourceGroup() --query 'properties.maxSizeBytes' --output tsv
+        $databaseSizeInBytes = az sql db show --name $this.getDBName() --server $this.getServerName() --resource-group $this.getDBResourceGroup() --query 'properties.currentServiceObjectiveName' --output tsv
+        $maxSizeInBytes = az sql db show --name $this.getDBName() --server $this.getServerName() --resource-group $this.getDBResourceGroup() --query 'properties.maxSizeBytes' --output tsv
 
         if ($databaseSizeInBytes -eq $null -or $maxSizeInBytes -eq $null) {
             return $false
@@ -91,7 +86,7 @@ class SQLDBCheck: ResourceCheck {
         $rules = Get-Content SQL/sqlDBRules.json | ConvertFrom-Json
 
         $this.Results.Add("Name", $this.getDBName())
-        $this.Results.Add("Server", $this.getDBServerName())
+        $this.Results.Add("Server", $this.getServerName())
         $this.Results.Add("Resource_Group", $this.getDBResourceGroup())
         $this.Results.Add("Name", $this.getDBLocation())
 

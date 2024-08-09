@@ -91,7 +91,7 @@ class SQLServerCheck: ResourceCheck {
 
         $this.Results.Add("Name", $this.getServerName())
         $this.Results.Add("Resource_Group", $this.getServerResourceGroup())
-        $this.Results.Add("Location", $this.getServerLocation)
+        $this.Results.Add("Location", $this.getServerLocation())
 
         foreach ($ruleTuple in $rules.PSObject.Properties) {
             $this.Results.Add($ruleTuple.Name, $this.checkRule($ruleTuple.Name, $ruleTuple.Value))
