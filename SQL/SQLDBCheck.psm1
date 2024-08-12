@@ -57,7 +57,7 @@ class SQLDBCheck: ResourceCheck {
     #Checks if there are replica's configured
     [bool] hasReplicasConfigured(){
         $DBReplica = az sql db replica list-links --name $this.getDBName() --server $this.getServerName() --resource-group $this.getDBResourceGroup() 
-        return $DBReplica -gt 0
+        return $DBReplica.Count -gt 0
     }
 
 
