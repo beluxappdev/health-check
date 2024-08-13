@@ -29,7 +29,7 @@ class SQLDBCheck: ResourceCheck {
 
     # Checks if Auditing on server level is enabled
     [bool] hasAuditingDBEnabled() {
-        $DBAuditing =  az sql db audit-policy show --name $this.getDBName() --resource-group $this.getDBResourceGroup() --server $this.getServerName() --query 'state' -o json | ConvertFrom-Json 
+        $DBAuditing = az sql db audit-policy show --name $this.getDBName() --resource-group $this.getDBResourceGroup() --server $this.getServerName() --query 'state' -o json | ConvertFrom-Json 
         return $DBAuditing -eq "Enabled"
     }
 
@@ -37,7 +37,8 @@ class SQLDBCheck: ResourceCheck {
     [bool] hasAutopauseDelayEnabled() {
         if ($this.DBObject.sku.tier -eq 'GeneralPurpose' -and $this.DBObject.sku.family -eq 'Gen5') {
             return $this.DBObject.autoPauseDelay -ne $null
-        } else {
+        }
+        else {
             return $false
         }
     }
@@ -49,15 +50,15 @@ class SQLDBCheck: ResourceCheck {
     }
 
     # Checks if SQL TDE is enabled
-    [bool] hasTDEenabled(){
+    [bool] hasTDEenabled() {
         $DBTDE = az sql db tde show --database $this.getDBName() --server $this.getServerName() --resource-group $this.getDBResourceGroup() --query 'state'  -o json | ConvertFrom-Json
         return $DBTDE -eq "Enabled"
     }
 
     #Checks if there are replica's configured
-    [bool] hasReplicasConfigured(){
-        $DBReplica = az sql db replica list-links --name $this.getDBName() --server $this.getServerName() --resource-group $this.getDBResourceGroup() 
-        return $DBReplica.Count -gt 0
+    [bool] hasReplicasConfigured() {
+        $DBReplica = az sql db replica list-links --name $this.getDBName() --server $this.getServerName() --resource-group $this.getDBResourceGroup() -o json | ConvertFrom-Json
+        return $DBReplica.count -gt 0
     }
 
 
