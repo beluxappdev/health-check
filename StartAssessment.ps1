@@ -2,6 +2,7 @@ using module ./AKS/AKSClusterCheck.psm1
 using module ./AKS/AKSNodePoolCheck.psm1
 using module ./APIM/APIMCheck.psm1
 using module ./SQL/SQLServerCheck.psm1
+using module ./SQL/SQLDBCheck.psm1
 
 
 param (

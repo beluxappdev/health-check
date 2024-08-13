@@ -17,6 +17,10 @@ class SQLServerCheck: ResourceCheck {
         return $this.ServerObject.resourceGroup
     }
 
+    [string] getServerLocation() {
+        return $this.ServerObject.location
+    }
+
     # Checks if Auditing on server level is enabled
     [bool] hasAuditingEnabled() {
         $ServerAuditing =  az sql server audit-policy show --name $this.getServerName() --resource-group $this.getServerResourceGroup() -o json | ConvertFrom-Json
@@ -83,10 +87,11 @@ class SQLServerCheck: ResourceCheck {
     }
 
     [CheckResults] assess() {
-        $rules = Get-Content SQL/sqlRules.json | ConvertFrom-Json
+        $rules = Get-Content SQL/sqlServerRules.json | ConvertFrom-Json
 
         $this.Results.Add("Name", $this.getServerName())
         $this.Results.Add("Resource_Group", $this.getServerResourceGroup())
+        $this.Results.Add("Location", $this.getServerLocation())
 
         foreach ($ruleTuple in $rules.PSObject.Properties) {
             $this.Results.Add($ruleTuple.Name, $this.checkRule($ruleTuple.Name, $ruleTuple.Value))
@@ -96,38 +101,3 @@ class SQLServerCheck: ResourceCheck {
     }
 
 }
-
-# class SQLDBCheck: ResourceCheck {
-    
-#     [object]$DBObject
-
-#     SQLDBCheck([string] $subscriptionId, [string] $subscriptionName, [object] $db): base($subscriptionId, $subscriptionName) {
-#         $this.DBObject = $db
-#     }
-
-#     [string] getDBName() {
-#         return $this.DBObject.name
-#     }
-
-#     [string] getDBResourceGroup() {
-#         return $this.DBObject.resourceGroup
-#     }
-
-#     [string] toString() {
-#         return ""
-#     }
-
-#     [CheckResults] assess() {
-#         $rules = Get-Content SQL/sqlRules.json | ConvertFrom-Json
-
-#         $this.Results.Add("Name", $this.getDBName())
-#         $this.Results.Add("Resource_Group", $this.getDBResourceGroup())
-
-#         foreach ($ruleTuple in $rules.PSObject.Properties) {
-#             $this.Results.Add($ruleTuple.Name, $this.checkRule($ruleTuple.Name, $ruleTuple.Value))
-#         }
-
-#         return $this.Results
-#     }
-
-# }
