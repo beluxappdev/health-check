@@ -1,7 +1,0 @@
-inventory:
-- source: DirectOwners
-  items:
-  - id: giliguor@microsoft.com
-  - id: pamontag@microsoft.com
-  - id: nvandewalle@microsoft.com
-  isProduction: false
